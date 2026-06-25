@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
+import { ZodError } from "zod";
 import { evaluate } from "./engine/evaluate.js";
 import { loadClaudeDesktopConfigFile } from "./ingest/claude-desktop.js";
 import { loadInventoryFile } from "./ingest/inventory.js";
@@ -27,6 +28,20 @@ Options:
 
 This is not legal advice.
 `;
+
+/** Turn a schema or JSON parse failure into a readable, line-per-issue message. */
+function formatLoadError(error: unknown): string {
+  if (error instanceof ZodError) {
+    const issues = error.issues.map(
+      (issue) => `  - ${issue.path.length > 0 ? issue.path.join(".") : "(root)"}: ${issue.message}`,
+    );
+    return `the input does not match the expected schema:\n${issues.join("\n")}`;
+  }
+  if (error instanceof SyntaxError) {
+    return `the file is not valid JSON: ${error.message}`;
+  }
+  return error instanceof Error ? error.message : String(error);
+}
 
 /** Parse arguments, ingest the inventory, evaluate the rules, and print the report. */
 export function run(argv: string[]): number {
@@ -64,8 +79,7 @@ export function run(argv: string[]): number {
   try {
     inventory = usingClaudeDesktop ? loadClaudeDesktopConfigFile(path) : loadInventoryFile(path);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    process.stderr.write(`failed to load inventory: ${message}\n`);
+    process.stderr.write(`failed to load inventory: ${formatLoadError(error)}\n`);
     return 1;
   }
 

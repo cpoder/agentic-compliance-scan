@@ -1,0 +1,129 @@
+{
+  "deployment": {
+    "name": "wm-ops-agent",
+    "isHighRiskAiSystem": false,
+    "inScopeSystems": ["webMethods Integration Server (production integration middleware)"],
+    "controls": {
+      "recordKeeping": false,
+      "humanOversight": false,
+      "transparencyNotice": false,
+      "riskManagement": false
+    }
+  },
+  "servers": [
+    {
+      "name": "wm-mcp-server",
+      "transport": "stdio",
+      "tools": [
+        {
+          "name": "is_status",
+          "description": "Read Integration Server status.",
+          "effects": {
+            "sideEffects": false,
+            "externalAccess": true,
+            "writes": false,
+            "humanInTheLoop": false,
+            "scope": ["wm:read"],
+            "dataCategories": []
+          }
+        },
+        {
+          "name": "flow_service_create",
+          "description": "Create a flow service on the Integration Server.",
+          "effects": {
+            "sideEffects": true,
+            "externalAccess": true,
+            "writes": true,
+            "humanInTheLoop": false,
+            "scope": ["wm:write", "wm:admin"],
+            "dataCategories": []
+          }
+        },
+        {
+          "name": "setup_user_management",
+          "description": "Create users, groups, and ACLs.",
+          "effects": {
+            "sideEffects": true,
+            "externalAccess": true,
+            "writes": true,
+            "humanInTheLoop": false,
+            "scope": ["wm:admin", "iam"],
+            "dataCategories": ["personal-data", "credentials"]
+          }
+        },
+        {
+          "name": "setup_oauth",
+          "description": "Register OAuth clients and scopes.",
+          "effects": {
+            "sideEffects": true,
+            "externalAccess": true,
+            "writes": true,
+            "humanInTheLoop": false,
+            "scope": ["wm:admin", "oauth"],
+            "dataCategories": ["credentials"]
+          }
+        },
+        {
+          "name": "is_shutdown",
+          "description": "Shut down the Integration Server.",
+          "effects": {
+            "sideEffects": true,
+            "externalAccess": true,
+            "writes": false,
+            "humanInTheLoop": false,
+            "scope": ["wm:admin"],
+            "dataCategories": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Neon",
+      "transport": "http",
+      "tools": [
+        {
+          "name": "run_sql",
+          "description": "Run SQL against a Neon Postgres database.",
+          "effects": {
+            "sideEffects": true,
+            "externalAccess": true,
+            "writes": true,
+            "humanInTheLoop": false,
+            "scope": ["db:write"],
+            "dataCategories": ["personal-data"]
+          }
+        },
+        {
+          "name": "get_database_tables",
+          "description": "List tables in a Neon database.",
+          "effects": {
+            "sideEffects": false,
+            "externalAccess": true,
+            "writes": false,
+            "humanInTheLoop": false,
+            "scope": ["db:read"],
+            "dataCategories": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "branchwork",
+      "transport": "http",
+      "tools": [
+        {
+          "name": "create_plan",
+          "description": "Create or update a local plan.",
+          "effects": {
+            "sideEffects": true,
+            "externalAccess": false,
+            "writes": true,
+            "humanInTheLoop": false,
+            "scope": ["plan:write"],
+            "dataCategories": []
+          }
+        }
+      ]
+    }
+  ]
+}
