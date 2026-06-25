@@ -2,20 +2,14 @@ import { describe, expect, it } from "vitest";
 import { evaluateCondition } from "../src/engine/condition.js";
 import { evaluate, MissingReferenceError } from "../src/engine/evaluate.js";
 import { loadAllRules } from "../src/rules/index.js";
-import type { Inventory } from "../src/schemas/inventory.js";
+import { type Inventory, InventorySchema } from "../src/schemas/inventory.js";
 import type { Rule } from "../src/schemas/rules.js";
 
-const riskyInventory: Inventory = {
+const riskyInventory: Inventory = InventorySchema.parse({
   deployment: {
     name: "demo",
     inScopeSystems: ["billing-system"],
     isHighRiskAiSystem: false,
-    controls: {
-      recordKeeping: false,
-      humanOversight: false,
-      transparencyNotice: false,
-      riskManagement: false,
-    },
   },
   servers: [
     {
@@ -38,7 +32,7 @@ const riskyInventory: Inventory = {
       prompts: [],
     },
   ],
-};
+});
 
 const writeRule: Rule = {
   id: "test.human-oversight.writing-tool-no-approval",
@@ -52,7 +46,7 @@ const writeRule: Rule = {
     all: [
       { toolEffect: "writes", equals: true },
       { toolEffect: "humanInTheLoop", equals: false },
-      { controlAbsent: "humanOversight" },
+      { controlAbsent: "aiActHumanOversight" },
     ],
   },
   references: [
@@ -74,7 +68,7 @@ const deploymentRule: Rule = {
   title: "In-scope system with no risk management",
   severity: "high",
   appliesWhen: {
-    all: [{ deploymentTouchesInScopeSystem: true }, { controlAbsent: "riskManagement" }],
+    all: [{ deploymentTouchesInScopeSystem: true }, { controlAbsent: "nis2RiskAnalysis" }],
   },
   references: [
     {

@@ -15,9 +15,27 @@ export type Condition =
   | { toolEffect: "sideEffects" | "externalAccess" | "writes" | "humanInTheLoop"; equals: boolean }
   | { toolScopeIncludes: string }
   | { toolDataCategory: string }
-  | { controlAbsent: "recordKeeping" | "humanOversight" | "transparencyNotice" | "riskManagement" }
+  | {
+      controlAbsent:
+        | "aiActLogging"
+        | "aiActHumanOversight"
+        | "aiActTransparency"
+        | "nis2RiskAnalysis"
+        | "nis2IncidentHandling"
+        | "nis2BusinessContinuity"
+        | "nis2SupplyChainSecurity"
+        | "nis2SecureDevelopment"
+        | "nis2EffectivenessAssessment"
+        | "nis2CyberHygiene"
+        | "nis2Cryptography"
+        | "nis2AccessControl"
+        | "nis2Mfa"
+        | "nis2Governance";
+    }
   | { deploymentTouchesInScopeSystem: true }
-  | { deploymentIsHighRiskAiSystem: true };
+  | { deploymentIsHighRiskAiSystem: true }
+  | { deploymentInteractsWithPeople: true }
+  | { deploymentGeneratesSyntheticContent: true };
 
 export const ConditionSchema: z.ZodType<Condition> = z.lazy(() =>
   z.union([
@@ -32,14 +50,26 @@ export const ConditionSchema: z.ZodType<Condition> = z.lazy(() =>
     z.object({ toolDataCategory: z.string().min(1) }),
     z.object({
       controlAbsent: z.enum([
-        "recordKeeping",
-        "humanOversight",
-        "transparencyNotice",
-        "riskManagement",
+        "aiActLogging",
+        "aiActHumanOversight",
+        "aiActTransparency",
+        "nis2RiskAnalysis",
+        "nis2IncidentHandling",
+        "nis2BusinessContinuity",
+        "nis2SupplyChainSecurity",
+        "nis2SecureDevelopment",
+        "nis2EffectivenessAssessment",
+        "nis2CyberHygiene",
+        "nis2Cryptography",
+        "nis2AccessControl",
+        "nis2Mfa",
+        "nis2Governance",
       ]),
     }),
     z.object({ deploymentTouchesInScopeSystem: z.literal(true) }),
     z.object({ deploymentIsHighRiskAiSystem: z.literal(true) }),
+    z.object({ deploymentInteractsWithPeople: z.literal(true) }),
+    z.object({ deploymentGeneratesSyntheticContent: z.literal(true) }),
   ]),
 );
 

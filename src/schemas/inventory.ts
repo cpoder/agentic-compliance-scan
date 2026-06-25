@@ -53,10 +53,23 @@ export type McpServer = z.infer<typeof McpServerSchema>;
  * tool's risk signals against these declared controls to surface a gap.
  */
 export const DeploymentControlsSchema = z.object({
-  recordKeeping: z.boolean(),
-  humanOversight: z.boolean(),
-  transparencyNotice: z.boolean(),
-  riskManagement: z.boolean(),
+  // AI Act deployer controls. Each maps 1:1 to the obligation a rule cites.
+  aiActLogging: z.boolean().default(false),
+  aiActHumanOversight: z.boolean().default(false),
+  aiActTransparency: z.boolean().default(false),
+  // NIS2 Art. 21(2) risk-management measures (a-j), one control each.
+  nis2RiskAnalysis: z.boolean().default(false),
+  nis2IncidentHandling: z.boolean().default(false),
+  nis2BusinessContinuity: z.boolean().default(false),
+  nis2SupplyChainSecurity: z.boolean().default(false),
+  nis2SecureDevelopment: z.boolean().default(false),
+  nis2EffectivenessAssessment: z.boolean().default(false),
+  nis2CyberHygiene: z.boolean().default(false),
+  nis2Cryptography: z.boolean().default(false),
+  nis2AccessControl: z.boolean().default(false),
+  nis2Mfa: z.boolean().default(false),
+  // NIS2 Art. 20 management-body governance accountability.
+  nis2Governance: z.boolean().default(false),
 });
 export type DeploymentControls = z.infer<typeof DeploymentControlsSchema>;
 
@@ -67,10 +80,14 @@ export const DeploymentSchema = z.object({
   /**
    * Whether the deployed system qualifies as a high-risk AI system (AI Act
    * Art. 6 / Annex III). Most AI Act deployer duties (Art. 26) bind only for
-   * high-risk systems, so the AI Act rules are gated on this. Defaults to false.
+   * high-risk systems, so those rules are gated on this. Defaults to false.
    */
   isHighRiskAiSystem: z.boolean().default(false),
-  controls: DeploymentControlsSchema,
+  /** Whether the agent interacts directly with natural persons (AI Act Art. 50(1) trigger). */
+  interactsWithPeople: z.boolean().default(false),
+  /** Whether the agent generates or manipulates synthetic content (AI Act Art. 50(4) trigger). */
+  generatesSyntheticContent: z.boolean().default(false),
+  controls: DeploymentControlsSchema.default(DeploymentControlsSchema.parse({})),
 });
 export type Deployment = z.infer<typeof DeploymentSchema>;
 

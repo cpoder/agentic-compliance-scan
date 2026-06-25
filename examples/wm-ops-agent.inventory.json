@@ -2,13 +2,7 @@
   "deployment": {
     "name": "wm-ops-agent",
     "isHighRiskAiSystem": false,
-    "inScopeSystems": ["webMethods Integration Server (production integration middleware)"],
-    "controls": {
-      "recordKeeping": false,
-      "humanOversight": false,
-      "transparencyNotice": false,
-      "riskManagement": false
-    }
+    "inScopeSystems": ["webMethods Integration Server (production integration middleware)"]
   },
   "servers": [
     {

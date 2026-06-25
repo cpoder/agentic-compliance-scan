@@ -39,12 +39,6 @@ export function importClaudeDesktopConfig(
     deployment: {
       name: deploymentName,
       inScopeSystems: [],
-      controls: {
-        recordKeeping: false,
-        humanOversight: false,
-        transparencyNotice: false,
-        riskManagement: false,
-      },
     },
     servers,
   });

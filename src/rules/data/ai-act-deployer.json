@@ -12,7 +12,7 @@
         "all": [
           { "deploymentIsHighRiskAiSystem": true },
           { "toolEffect": "sideEffects", "equals": true },
-          { "controlAbsent": "recordKeeping" }
+          { "controlAbsent": "aiActLogging" }
         ]
       },
       "references": [
@@ -38,7 +38,7 @@
         "all": [
           { "deploymentIsHighRiskAiSystem": true },
           { "toolEffect": "externalAccess", "equals": true },
-          { "controlAbsent": "recordKeeping" }
+          { "controlAbsent": "aiActLogging" }
         ]
       },
       "references": [
@@ -64,7 +64,7 @@
         "all": [
           { "deploymentIsHighRiskAiSystem": true },
           { "toolEffect": "writes", "equals": true },
-          { "controlAbsent": "recordKeeping" }
+          { "controlAbsent": "aiActLogging" }
         ]
       },
       "references": [
@@ -91,7 +91,7 @@
           { "deploymentIsHighRiskAiSystem": true },
           { "toolEffect": "writes", "equals": true },
           { "toolEffect": "humanInTheLoop", "equals": false },
-          { "controlAbsent": "humanOversight" }
+          { "controlAbsent": "aiActHumanOversight" }
         ]
       },
       "references": [
@@ -118,7 +118,7 @@
           { "deploymentIsHighRiskAiSystem": true },
           { "toolEffect": "sideEffects", "equals": true },
           { "toolEffect": "humanInTheLoop", "equals": false },
-          { "controlAbsent": "humanOversight" }
+          { "controlAbsent": "aiActHumanOversight" }
         ]
       },
       "references": [
@@ -145,7 +145,7 @@
           { "deploymentIsHighRiskAiSystem": true },
           { "toolEffect": "externalAccess", "equals": true },
           { "toolEffect": "humanInTheLoop", "equals": false },
-          { "controlAbsent": "humanOversight" }
+          { "controlAbsent": "aiActHumanOversight" }
         ]
       },
       "references": [
@@ -155,6 +155,53 @@
           "article": "Art. 26(2)",
           "sourceUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
           "source": "EUR-Lex Regulation (EU) 2024/1689, Art. 26(2)",
+          "validated": true
+        }
+      ]
+    },
+    {
+      "id": "ai-act.transparency.agent-no-ai-disclosure",
+      "category": "transparency",
+      "scope": "deployment",
+      "jurisdictions": ["EU"],
+      "title": "Agent interacts with people but does not disclose it is an AI system",
+      "guidance": "Ensure people interacting with the agent are informed they are dealing with an AI system, unless that is obvious from the context.",
+      "severity": "medium",
+      "appliesWhen": {
+        "all": [{ "deploymentInteractsWithPeople": true }, { "controlAbsent": "aiActTransparency" }]
+      },
+      "references": [
+        {
+          "instrument": "ai-act",
+          "jurisdiction": "EU",
+          "article": "Art. 50(1)",
+          "sourceUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
+          "source": "EUR-Lex Regulation (EU) 2024/1689, Art. 50(1)",
+          "validated": true
+        }
+      ]
+    },
+    {
+      "id": "ai-act.transparency.synthetic-content-no-disclosure",
+      "category": "transparency",
+      "scope": "deployment",
+      "jurisdictions": ["EU"],
+      "title": "Agent generates synthetic content without disclosing it is AI-generated",
+      "guidance": "Disclose that image, audio, video, or public-interest text the agent generates or manipulates is artificially generated.",
+      "severity": "medium",
+      "appliesWhen": {
+        "all": [
+          { "deploymentGeneratesSyntheticContent": true },
+          { "controlAbsent": "aiActTransparency" }
+        ]
+      },
+      "references": [
+        {
+          "instrument": "ai-act",
+          "jurisdiction": "EU",
+          "article": "Art. 50(4)",
+          "sourceUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
+          "source": "EUR-Lex Regulation (EU) 2024/1689, Art. 50(4)",
           "validated": true
         }
       ]

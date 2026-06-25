@@ -1,13 +1,7 @@
 {
   "deployment": {
     "name": "example-agent-deployment",
-    "inScopeSystems": [],
-    "controls": {
-      "recordKeeping": false,
-      "humanOversight": false,
-      "transparencyNotice": false,
-      "riskManagement": false
-    }
+    "inScopeSystems": []
   },
   "servers": [
     {

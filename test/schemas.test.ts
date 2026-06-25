@@ -6,12 +6,6 @@ const validInventory = {
   deployment: {
     name: "demo",
     inScopeSystems: [],
-    controls: {
-      recordKeeping: false,
-      humanOversight: false,
-      transparencyNotice: false,
-      riskManagement: false,
-    },
   },
   servers: [],
 };
@@ -21,8 +15,8 @@ describe("InventorySchema", () => {
     expect(InventorySchema.parse(validInventory).deployment.name).toBe("demo");
   });
 
-  it("rejects an inventory whose deployment has no controls", () => {
-    const bad = { deployment: { name: "x", inScopeSystems: [] }, servers: [] };
+  it("rejects an inventory whose deployment has no name", () => {
+    const bad = { deployment: { inScopeSystems: [] }, servers: [] };
     expect(() => InventorySchema.parse(bad)).toThrow();
   });
 });

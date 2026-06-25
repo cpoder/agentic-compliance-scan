@@ -2,13 +2,7 @@
   "deployment": {
     "name": "billing-agent",
     "isHighRiskAiSystem": true,
-    "inScopeSystems": ["billing"],
-    "controls": {
-      "recordKeeping": false,
-      "humanOversight": false,
-      "transparencyNotice": false,
-      "riskManagement": false
-    }
+    "inScopeSystems": ["billing"]
   },
   "servers": [
     {

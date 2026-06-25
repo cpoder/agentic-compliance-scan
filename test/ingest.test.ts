@@ -12,8 +12,8 @@ describe("parseInventory", () => {
     expect(inventory.servers[0]?.tools[0]?.effects.writes).toBe(true);
   });
 
-  it("rejects an inventory whose deployment is incomplete", () => {
-    expect(() => parseInventory({ deployment: { name: "x" }, servers: [] })).toThrow();
+  it("rejects an inventory whose deployment has no name", () => {
+    expect(() => parseInventory({ deployment: {}, servers: [] })).toThrow();
   });
 });
 
@@ -27,7 +27,7 @@ describe("importClaudeDesktopConfig", () => {
     });
     expect(inventory.servers.map((server) => server.name).sort()).toEqual(["filesystem", "github"]);
     expect(inventory.servers.every((server) => server.tools.length === 0)).toBe(true);
-    expect(inventory.deployment.controls.recordKeeping).toBe(false);
+    expect(inventory.deployment.controls.aiActLogging).toBe(false);
   });
 
   it("loads the claude desktop config fixture from disk", () => {

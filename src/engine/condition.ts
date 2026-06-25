@@ -37,5 +37,11 @@ export function evaluateCondition(condition: Condition, ctx: EvalContext): boole
   if ("deploymentTouchesInScopeSystem" in condition) {
     return ctx.deployment.inScopeSystems.length > 0;
   }
-  return ctx.deployment.isHighRiskAiSystem;
+  if ("deploymentIsHighRiskAiSystem" in condition) {
+    return ctx.deployment.isHighRiskAiSystem;
+  }
+  if ("deploymentInteractsWithPeople" in condition) {
+    return ctx.deployment.interactsWithPeople;
+  }
+  return ctx.deployment.generatesSyntheticContent;
 }

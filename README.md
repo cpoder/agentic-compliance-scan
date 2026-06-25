@@ -53,12 +53,12 @@ The input is a single JSON object. A minimal example:
   "deployment": {
     "name": "billing-agent",
     "isHighRiskAiSystem": false,
+    "interactsWithPeople": false,
+    "generatesSyntheticContent": false,
     "inScopeSystems": ["billing"],
     "controls": {
-      "recordKeeping": false,
-      "humanOversight": false,
-      "transparencyNotice": false,
-      "riskManagement": false
+      "nis2IncidentHandling": true,
+      "nis2BusinessContinuity": true
     }
   },
   "servers": [
@@ -85,8 +85,9 @@ The input is a single JSON object. A minimal example:
 
 A few fields carry the weight of the analysis:
 
-- `deployment.controls` are the governance controls you declare you have in place. A rule fires when a risky tool meets a missing control.
-- `deployment.isHighRiskAiSystem` gates the AI Act rules. The AI Act deployer duties in Article 26 bind only for high-risk AI systems, so they do not fire unless you set this to `true`.
+- `deployment.controls` are the governance controls you declare you have in place, one key per obligation (the ten NIS2 Art. 21(2) measures, NIS2 Art. 20 governance, and the AI Act logging, oversight, and transparency duties). It is optional and every key defaults to false: declare only the controls you have, and a missing one becomes a gap. See `src/schemas/inventory.ts` for the full key list.
+- `deployment.isHighRiskAiSystem` gates the AI Act Article 26 rules. Those deployer duties bind only for high-risk AI systems, so they do not fire unless you set this to `true`.
+- `deployment.interactsWithPeople` and `deployment.generatesSyntheticContent` gate the AI Act Article 50 transparency rules, which apply regardless of high-risk status.
 - `deployment.inScopeSystems` lists the NIS2 in-scope systems the agent acts on. The NIS2 rules apply only when this is non-empty.
 - each tool's `effects` describe what the tool can observably do (side effects, external access, writes, whether a human approves it, its scope, and the data categories it touches).
 
