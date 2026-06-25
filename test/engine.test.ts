@@ -9,6 +9,7 @@ const riskyInventory: Inventory = {
   deployment: {
     name: "demo",
     inScopeSystems: ["billing-system"],
+    isHighRiskAiSystem: false,
     controls: {
       recordKeeping: false,
       humanOversight: false,
@@ -128,8 +129,26 @@ describe("evaluate", () => {
     expect(findings[0]?.evidence).toContain("deployment:");
   });
 
-  it("fails loud on the shipped seed rules, which have no references yet", () => {
+  it("evaluates the shipped seed rules: NIS2 fires, AI Act stays gated off", () => {
     const seed = loadAllRules().rules;
-    expect(() => evaluate(riskyInventory, seed, "FR")).toThrow(MissingReferenceError);
+    const findings = evaluate(riskyInventory, seed, "FR");
+    // The deployment touches an in-scope system with no controls, so the NIS2
+    // deployment rules fire. The AI Act rules do not, because the deployment is
+    // not flagged as a high-risk AI system.
+    expect(findings.length).toBeGreaterThan(0);
+    expect(findings.every((finding) => finding.ref.instrument === "nis2")).toBe(true);
+  });
+
+  it("fires AI Act rules only when the deployment is a high-risk AI system", () => {
+    const seed = loadAllRules().rules;
+    const highRisk: Inventory = {
+      ...riskyInventory,
+      deployment: { ...riskyInventory.deployment, isHighRiskAiSystem: true },
+    };
+    // EU jurisdiction: only AI Act rules apply (national NIS2 rules do not).
+    expect(evaluate(riskyInventory, seed, "EU")).toHaveLength(0);
+    const high = evaluate(highRisk, seed, "EU");
+    expect(high.length).toBeGreaterThan(0);
+    expect(high.every((finding) => finding.ref.instrument === "ai-act")).toBe(true);
   });
 });

@@ -14,6 +14,11 @@ function formatRef(finding: Finding): string {
   if (ref.sourceUrl) {
     parts.push(ref.sourceUrl);
   }
+  if (ref.status === "draft") {
+    parts.push("(draft, not yet in force)");
+  } else if (ref.status === "deferred") {
+    parts.push("(enacted, effect deferred)");
+  }
   if (!ref.validated) {
     parts.push("(reference pending maintainer validation)");
   }

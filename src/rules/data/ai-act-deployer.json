@@ -5,138 +5,159 @@
       "category": "record-keeping",
       "scope": "tool",
       "jurisdictions": ["EU"],
-      "title": "State-changing tool with no record-keeping declared",
-      "guidance": "Log invocations of tools that change state, enough to reconstruct what the agent did.",
+      "title": "State-changing tool on a high-risk AI system with no record-keeping declared",
+      "guidance": "For a high-risk AI system, keep the automatically generated logs under the deployer's control and record state-changing tool invocations, enough to reconstruct what the agent did.",
       "severity": "medium",
       "appliesWhen": {
         "all": [
+          { "deploymentIsHighRiskAiSystem": true },
           { "toolEffect": "sideEffects", "equals": true },
           { "controlAbsent": "recordKeeping" }
         ]
       },
-      "references": []
+      "references": [
+        {
+          "instrument": "ai-act",
+          "jurisdiction": "EU",
+          "article": "Art. 26(6)",
+          "sourceUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
+          "source": "EUR-Lex Regulation (EU) 2024/1689, Art. 26(6)",
+          "validated": true
+        }
+      ]
     },
     {
       "id": "ai-act.record-keeping.external-access-tool-no-logs",
       "category": "record-keeping",
       "scope": "tool",
       "jurisdictions": ["EU"],
-      "title": "External-access tool with no record-keeping declared",
-      "guidance": "Log calls a tool makes to external systems, including the target and the outcome.",
+      "title": "External-access tool on a high-risk AI system with no record-keeping declared",
+      "guidance": "For a high-risk AI system, keep logs of calls a tool makes to external systems, including the target and the outcome.",
       "severity": "medium",
       "appliesWhen": {
         "all": [
+          { "deploymentIsHighRiskAiSystem": true },
           { "toolEffect": "externalAccess", "equals": true },
           { "controlAbsent": "recordKeeping" }
         ]
       },
-      "references": []
+      "references": [
+        {
+          "instrument": "ai-act",
+          "jurisdiction": "EU",
+          "article": "Art. 26(6)",
+          "sourceUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
+          "source": "EUR-Lex Regulation (EU) 2024/1689, Art. 26(6)",
+          "validated": true
+        }
+      ]
     },
     {
       "id": "ai-act.record-keeping.writing-tool-no-logs",
       "category": "record-keeping",
       "scope": "tool",
       "jurisdictions": ["EU"],
-      "title": "Data-writing tool with no record-keeping declared",
-      "guidance": "Log write operations a tool performs so changes to data are traceable.",
+      "title": "Data-writing tool on a high-risk AI system with no record-keeping declared",
+      "guidance": "For a high-risk AI system, keep logs of write operations a tool performs so changes to data are traceable.",
       "severity": "medium",
       "appliesWhen": {
-        "all": [{ "toolEffect": "writes", "equals": true }, { "controlAbsent": "recordKeeping" }]
+        "all": [
+          { "deploymentIsHighRiskAiSystem": true },
+          { "toolEffect": "writes", "equals": true },
+          { "controlAbsent": "recordKeeping" }
+        ]
       },
-      "references": []
+      "references": [
+        {
+          "instrument": "ai-act",
+          "jurisdiction": "EU",
+          "article": "Art. 26(6)",
+          "sourceUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
+          "source": "EUR-Lex Regulation (EU) 2024/1689, Art. 26(6)",
+          "validated": true
+        }
+      ]
     },
     {
       "id": "ai-act.human-oversight.writing-tool-no-approval",
       "category": "human-oversight",
       "scope": "tool",
       "jurisdictions": ["EU"],
-      "title": "Data-writing tool with no human approval and no oversight",
-      "guidance": "Add an approval step before a tool can write, or declare a human oversight process.",
+      "title": "Data-writing tool on a high-risk AI system with no human approval and no oversight",
+      "guidance": "For a high-risk AI system, assign human oversight to a competent, trained, authorised person, or add an approval step before a tool can write.",
       "severity": "high",
       "appliesWhen": {
         "all": [
+          { "deploymentIsHighRiskAiSystem": true },
           { "toolEffect": "writes", "equals": true },
           { "toolEffect": "humanInTheLoop", "equals": false },
           { "controlAbsent": "humanOversight" }
         ]
       },
-      "references": []
+      "references": [
+        {
+          "instrument": "ai-act",
+          "jurisdiction": "EU",
+          "article": "Art. 26(2)",
+          "sourceUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
+          "source": "EUR-Lex Regulation (EU) 2024/1689, Art. 26(2)",
+          "validated": true
+        }
+      ]
     },
     {
       "id": "ai-act.human-oversight.state-changing-tool-no-approval",
       "category": "human-oversight",
       "scope": "tool",
       "jurisdictions": ["EU"],
-      "title": "State-changing tool with no human approval and no oversight",
-      "guidance": "Gate state-changing tool calls behind a human approval step, or declare an oversight process.",
+      "title": "State-changing tool on a high-risk AI system with no human approval and no oversight",
+      "guidance": "For a high-risk AI system, assign human oversight to a competent, trained, authorised person, or gate state-changing tool calls behind a human approval step.",
       "severity": "high",
       "appliesWhen": {
         "all": [
+          { "deploymentIsHighRiskAiSystem": true },
           { "toolEffect": "sideEffects", "equals": true },
           { "toolEffect": "humanInTheLoop", "equals": false },
           { "controlAbsent": "humanOversight" }
         ]
       },
-      "references": []
+      "references": [
+        {
+          "instrument": "ai-act",
+          "jurisdiction": "EU",
+          "article": "Art. 26(2)",
+          "sourceUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
+          "source": "EUR-Lex Regulation (EU) 2024/1689, Art. 26(2)",
+          "validated": true
+        }
+      ]
     },
     {
       "id": "ai-act.human-oversight.external-tool-no-approval",
       "category": "human-oversight",
       "scope": "tool",
       "jurisdictions": ["EU"],
-      "title": "External-access tool with no human approval and no oversight",
-      "guidance": "Require human review for tools that reach external systems, or declare an oversight process.",
+      "title": "External-access tool on a high-risk AI system with no human approval and no oversight",
+      "guidance": "For a high-risk AI system, assign human oversight to a competent, trained, authorised person, or require human review for tools that reach external systems.",
       "severity": "medium",
       "appliesWhen": {
         "all": [
+          { "deploymentIsHighRiskAiSystem": true },
           { "toolEffect": "externalAccess", "equals": true },
           { "toolEffect": "humanInTheLoop", "equals": false },
           { "controlAbsent": "humanOversight" }
         ]
       },
-      "references": []
-    },
-    {
-      "id": "ai-act.transparency.personal-data-no-notice",
-      "category": "transparency",
-      "scope": "tool",
-      "jurisdictions": ["EU"],
-      "title": "Tool handling personal data with no transparency notice",
-      "guidance": "Inform affected people that an automated agent processes their personal data through this tool.",
-      "severity": "medium",
-      "appliesWhen": {
-        "all": [{ "toolDataCategory": "personal-data" }, { "controlAbsent": "transparencyNotice" }]
-      },
-      "references": []
-    },
-    {
-      "id": "ai-act.transparency.credentials-no-notice",
-      "category": "transparency",
-      "scope": "tool",
-      "jurisdictions": ["EU"],
-      "title": "Tool handling credentials with no transparency notice",
-      "guidance": "Document and disclose that this tool handles credentials, and who can see the resulting actions.",
-      "severity": "medium",
-      "appliesWhen": {
-        "all": [{ "toolDataCategory": "credentials" }, { "controlAbsent": "transparencyNotice" }]
-      },
-      "references": []
-    },
-    {
-      "id": "ai-act.transparency.external-flow-no-notice",
-      "category": "transparency",
-      "scope": "tool",
-      "jurisdictions": ["EU"],
-      "title": "External data flow with no transparency notice",
-      "guidance": "Disclose that the agent sends data to external systems through this tool.",
-      "severity": "low",
-      "appliesWhen": {
-        "all": [
-          { "toolEffect": "externalAccess", "equals": true },
-          { "controlAbsent": "transparencyNotice" }
-        ]
-      },
-      "references": []
+      "references": [
+        {
+          "instrument": "ai-act",
+          "jurisdiction": "EU",
+          "article": "Art. 26(2)",
+          "sourceUrl": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
+          "source": "EUR-Lex Regulation (EU) 2024/1689, Art. 26(2)",
+          "validated": true
+        }
+      ]
     }
   ]
 }

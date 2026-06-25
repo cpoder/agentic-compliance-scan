@@ -16,7 +16,8 @@ export type Condition =
   | { toolScopeIncludes: string }
   | { toolDataCategory: string }
   | { controlAbsent: "recordKeeping" | "humanOversight" | "transparencyNotice" | "riskManagement" }
-  | { deploymentTouchesInScopeSystem: true };
+  | { deploymentTouchesInScopeSystem: true }
+  | { deploymentIsHighRiskAiSystem: true };
 
 export const ConditionSchema: z.ZodType<Condition> = z.lazy(() =>
   z.union([
@@ -38,6 +39,7 @@ export const ConditionSchema: z.ZodType<Condition> = z.lazy(() =>
       ]),
     }),
     z.object({ deploymentTouchesInScopeSystem: z.literal(true) }),
+    z.object({ deploymentIsHighRiskAiSystem: z.literal(true) }),
   ]),
 );
 
@@ -64,6 +66,14 @@ export const LegalRefSchema = z.object({
   nationalRef: z.string().optional(),
   sourceUrl: z.string().url().optional(),
   source: z.string().optional(),
+  /**
+   * In-force status of the cited provision. "draft" means the national law is
+   * not yet promulgated (e.g. France in 2026); "deferred" means it is enacted
+   * but its effect is postponed (e.g. Portugal art. 27 pending CNCS regulations).
+   * Omitted means in force. The report surfaces a non-in-force status so a user
+   * is never told a draft obligation already binds.
+   */
+  status: z.enum(["in-force", "draft", "deferred"]).optional(),
   validated: z.boolean().default(false),
 });
 export type LegalRef = z.infer<typeof LegalRefSchema>;

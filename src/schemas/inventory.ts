@@ -64,6 +64,12 @@ export const DeploymentSchema = z.object({
   name: z.string().min(1),
   /** Labels of NIS2 in-scope systems the agent acts on. Empty means none declared. */
   inScopeSystems: z.array(z.string()).default([]),
+  /**
+   * Whether the deployed system qualifies as a high-risk AI system (AI Act
+   * Art. 6 / Annex III). Most AI Act deployer duties (Art. 26) bind only for
+   * high-risk systems, so the AI Act rules are gated on this. Defaults to false.
+   */
+  isHighRiskAiSystem: z.boolean().default(false),
   controls: DeploymentControlsSchema,
 });
 export type Deployment = z.infer<typeof DeploymentSchema>;

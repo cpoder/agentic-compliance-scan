@@ -34,5 +34,8 @@ export function evaluateCondition(condition: Condition, ctx: EvalContext): boole
   if ("controlAbsent" in condition) {
     return ctx.deployment.controls[condition.controlAbsent] === false;
   }
-  return ctx.deployment.inScopeSystems.length > 0;
+  if ("deploymentTouchesInScopeSystem" in condition) {
+    return ctx.deployment.inScopeSystems.length > 0;
+  }
+  return ctx.deployment.isHighRiskAiSystem;
 }

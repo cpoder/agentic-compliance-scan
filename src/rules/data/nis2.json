@@ -5,39 +5,166 @@
       "category": "nis2-risk-management",
       "scope": "deployment",
       "jurisdictions": ["FR", "IT", "PT", "BE", "DE"],
-      "title": "Agent acts on an in-scope system with no risk management declared",
-      "guidance": "Declare a risk management process covering the agent's actions on the in-scope system.",
+      "title": "Agent acts on an in-scope system with no risk-management measures declared",
+      "guidance": "Declare cybersecurity risk-management measures covering the agent's actions on the in-scope system.",
       "severity": "high",
       "appliesWhen": {
         "all": [{ "deploymentTouchesInScopeSystem": true }, { "controlAbsent": "riskManagement" }]
       },
-      "references": []
+      "references": [
+        {
+          "instrument": "nis2",
+          "jurisdiction": "IT",
+          "article": "Art. 24",
+          "nationalRef": "Decreto Legislativo 138/2024",
+          "source": "Reglyze nis2-mappings/countries/it.yaml (directive_article 21)",
+          "validated": true
+        },
+        {
+          "instrument": "nis2",
+          "jurisdiction": "BE",
+          "article": "Art. 30",
+          "nationalRef": "Loi du 26 avril 2024 (NIS2)",
+          "source": "Reglyze nis2-mappings/countries/be.yaml (directive_article 21)",
+          "validated": true
+        },
+        {
+          "instrument": "nis2",
+          "jurisdiction": "DE",
+          "article": "§ 30 Abs. 1 BSIG",
+          "nationalRef": "BSIG (NIS2UmsuCG 2025)",
+          "source": "Reglyze nis2-mappings/countries/de.yaml (directive_article 21)",
+          "validated": true
+        },
+        {
+          "instrument": "nis2",
+          "jurisdiction": "PT",
+          "article": "Art. 26.º e 27.º RJC",
+          "nationalRef": "Decreto-Lei 125/2025 (Regime Jurídico da Cibersegurança)",
+          "source": "Reglyze nis2-mappings/countries/pt.yaml (directive_article 21)",
+          "validated": true
+        },
+        {
+          "instrument": "nis2",
+          "jurisdiction": "FR",
+          "article": "Art. 14 (Titre II)",
+          "nationalRef": "Projet de loi Résilience (Titre II), non promulgué",
+          "source": "Reglyze nis2-mappings/countries/fr.yaml (directive_article 21)",
+          "status": "draft",
+          "validated": true
+        }
+      ]
     },
     {
       "id": "nis2.risk-management.in-scope-no-record-keeping",
       "category": "nis2-risk-management",
       "scope": "deployment",
       "jurisdictions": ["FR", "IT", "PT", "BE", "DE"],
-      "title": "Agent acts on an in-scope system with no record-keeping declared",
-      "guidance": "Keep records of the agent's actions on the in-scope system to support incident handling.",
+      "title": "Agent acts on an in-scope system with no incident-handling record-keeping declared",
+      "guidance": "There is no standalone national logging duty: this derives from the incident-handling measure. Keep records of the agent's actions sufficient to detect, handle, and report incidents.",
       "severity": "medium",
       "appliesWhen": {
         "all": [{ "deploymentTouchesInScopeSystem": true }, { "controlAbsent": "recordKeeping" }]
       },
-      "references": []
+      "references": [
+        {
+          "instrument": "nis2",
+          "jurisdiction": "IT",
+          "article": "Art. 24 c.2 lett. b)",
+          "nationalRef": "Decreto Legislativo 138/2024",
+          "source": "Reglyze nis2-mappings/countries/it.yaml (derived from incident-handling, art21_2_b)",
+          "validated": true
+        },
+        {
+          "instrument": "nis2",
+          "jurisdiction": "BE",
+          "article": "Art. 30 § 3, 2°",
+          "nationalRef": "Loi du 26 avril 2024 (NIS2)",
+          "source": "Reglyze nis2-mappings/countries/be.yaml (derived from incident-handling, art21_2_b)",
+          "validated": true
+        },
+        {
+          "instrument": "nis2",
+          "jurisdiction": "DE",
+          "article": "§ 30 Abs. 2 Nr. 2 BSIG",
+          "nationalRef": "BSIG (NIS2UmsuCG 2025)",
+          "source": "Reglyze nis2-mappings/countries/de.yaml (derived from incident-handling, art21_2_b)",
+          "validated": true
+        },
+        {
+          "instrument": "nis2",
+          "jurisdiction": "PT",
+          "article": "Art. 27.º n.º 1 al. a) RJC",
+          "nationalRef": "Decreto-Lei 125/2025 (Regime Jurídico da Cibersegurança)",
+          "source": "Reglyze nis2-mappings/countries/pt.yaml (derived from incident-handling, art21_2_b)",
+          "status": "deferred",
+          "validated": true
+        },
+        {
+          "instrument": "nis2",
+          "jurisdiction": "FR",
+          "article": "Art. 14, 3° (Titre II)",
+          "nationalRef": "Projet de loi Résilience (Titre II), non promulgué",
+          "source": "Reglyze nis2-mappings/countries/fr.yaml (derived from incident-handling, art21_2_b)",
+          "status": "draft",
+          "validated": true
+        }
+      ]
     },
     {
       "id": "nis2.risk-management.in-scope-no-human-oversight",
       "category": "nis2-risk-management",
       "scope": "deployment",
       "jurisdictions": ["FR", "IT", "PT", "BE", "DE"],
-      "title": "Agent acts on an in-scope system with no human oversight declared",
-      "guidance": "Declare a human oversight process for the agent's actions on the in-scope system.",
+      "title": "Agent acts on an in-scope system with no management-body accountability declared",
+      "guidance": "NIS2 makes the management body approve and supervise the risk-management measures and be trained on them. Declare that governance accountability (this is board-level accountability, not runtime human-in-the-loop).",
       "severity": "medium",
       "appliesWhen": {
         "all": [{ "deploymentTouchesInScopeSystem": true }, { "controlAbsent": "humanOversight" }]
       },
-      "references": []
+      "references": [
+        {
+          "instrument": "nis2",
+          "jurisdiction": "IT",
+          "article": "Art. 23",
+          "nationalRef": "Decreto Legislativo 138/2024",
+          "source": "Reglyze nis2-mappings/countries/it.yaml (directive_article 20)",
+          "validated": true
+        },
+        {
+          "instrument": "nis2",
+          "jurisdiction": "BE",
+          "article": "Art. 31",
+          "nationalRef": "Loi du 26 avril 2024 (NIS2)",
+          "source": "Reglyze nis2-mappings/countries/be.yaml (directive_article 20)",
+          "validated": true
+        },
+        {
+          "instrument": "nis2",
+          "jurisdiction": "DE",
+          "article": "§ 38 BSIG",
+          "nationalRef": "BSIG (NIS2UmsuCG 2025)",
+          "source": "Reglyze nis2-mappings/countries/de.yaml (directive_article 20)",
+          "validated": true
+        },
+        {
+          "instrument": "nis2",
+          "jurisdiction": "PT",
+          "article": "Art. 25.º RJC",
+          "nationalRef": "Decreto-Lei 125/2025 (Regime Jurídico da Cibersegurança)",
+          "source": "Reglyze nis2-mappings/countries/pt.yaml (directive_article 20)",
+          "validated": true
+        },
+        {
+          "instrument": "nis2",
+          "jurisdiction": "FR",
+          "article": "Art. 14 §1 + 1° (Titre II; cf. art. 37 V)",
+          "nationalRef": "Projet de loi Résilience (Titre II), non promulgué",
+          "source": "Reglyze nis2-mappings/countries/fr.yaml (directive_article 20)",
+          "status": "draft",
+          "validated": true
+        }
+      ]
     }
   ]
 }

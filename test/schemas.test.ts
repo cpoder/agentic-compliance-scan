@@ -28,9 +28,12 @@ describe("InventorySchema", () => {
 });
 
 describe("rule data", () => {
-  it("ships valid rule sets whose references are not yet populated", () => {
+  it("ships validated references for every rule", () => {
     const { rules } = loadAllRules();
     expect(rules.length).toBeGreaterThan(0);
-    expect(rules.every((rule) => rule.references.length === 0)).toBe(true);
+    expect(rules.every((rule) => rule.references.length > 0)).toBe(true);
+    expect(rules.every((rule) => rule.references.every((reference) => reference.validated))).toBe(
+      true,
+    );
   });
 });
