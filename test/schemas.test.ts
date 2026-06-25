@@ -28,7 +28,9 @@ describe("InventorySchema", () => {
 });
 
 describe("rule data", () => {
-  it("ships valid but empty rule sets in v0", () => {
-    expect(loadAllRules().rules).toEqual([]);
+  it("ships valid rule sets whose references are not yet populated", () => {
+    const { rules } = loadAllRules();
+    expect(rules.length).toBeGreaterThan(0);
+    expect(rules.every((rule) => rule.ref === null)).toBe(true);
   });
 });

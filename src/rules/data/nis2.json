@@ -1,3 +1,43 @@
 {
-  "rules": []
+  "rules": [
+    {
+      "id": "nis2.risk-management.in-scope-no-risk-management",
+      "category": "nis2-risk-management",
+      "scope": "deployment",
+      "jurisdictions": ["FR", "IT", "PT", "BE", "DE"],
+      "title": "Agent acts on an in-scope system with no risk management declared",
+      "guidance": "Declare a risk management process covering the agent's actions on the in-scope system.",
+      "severity": "high",
+      "appliesWhen": {
+        "all": [{ "deploymentTouchesInScopeSystem": true }, { "controlAbsent": "riskManagement" }]
+      },
+      "ref": null
+    },
+    {
+      "id": "nis2.risk-management.in-scope-no-record-keeping",
+      "category": "nis2-risk-management",
+      "scope": "deployment",
+      "jurisdictions": ["FR", "IT", "PT", "BE", "DE"],
+      "title": "Agent acts on an in-scope system with no record-keeping declared",
+      "guidance": "Keep records of the agent's actions on the in-scope system to support incident handling.",
+      "severity": "medium",
+      "appliesWhen": {
+        "all": [{ "deploymentTouchesInScopeSystem": true }, { "controlAbsent": "recordKeeping" }]
+      },
+      "ref": null
+    },
+    {
+      "id": "nis2.risk-management.in-scope-no-human-oversight",
+      "category": "nis2-risk-management",
+      "scope": "deployment",
+      "jurisdictions": ["FR", "IT", "PT", "BE", "DE"],
+      "title": "Agent acts on an in-scope system with no human oversight declared",
+      "guidance": "Declare a human oversight process for the agent's actions on the in-scope system.",
+      "severity": "medium",
+      "appliesWhen": {
+        "all": [{ "deploymentTouchesInScopeSystem": true }, { "controlAbsent": "humanOversight" }]
+      },
+      "ref": null
+    }
+  ]
 }

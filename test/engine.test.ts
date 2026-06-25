@@ -1,0 +1,118 @@
+import { describe, expect, it } from "vitest";
+import { evaluateCondition } from "../src/engine/condition.js";
+import { evaluate, MissingReferenceError } from "../src/engine/evaluate.js";
+import { loadAllRules } from "../src/rules/index.js";
+import type { Inventory } from "../src/schemas/inventory.js";
+import type { Rule } from "../src/schemas/rules.js";
+
+const riskyInventory: Inventory = {
+  deployment: {
+    name: "demo",
+    inScopeSystems: ["billing-system"],
+    controls: {
+      recordKeeping: false,
+      humanOversight: false,
+      transparencyNotice: false,
+      riskManagement: false,
+    },
+  },
+  servers: [
+    {
+      name: "filesystem",
+      transport: "stdio",
+      tools: [
+        {
+          name: "write_file",
+          effects: {
+            sideEffects: true,
+            externalAccess: false,
+            writes: true,
+            humanInTheLoop: false,
+            scope: ["fs:write"],
+            dataCategories: [],
+          },
+        },
+      ],
+      resources: [],
+      prompts: [],
+    },
+  ],
+};
+
+const writeRule: Rule = {
+  id: "test.human-oversight.writing-tool-no-approval",
+  category: "human-oversight",
+  scope: "tool",
+  jurisdictions: ["EU"],
+  title: "Writing tool with no approval and no oversight",
+  guidance: "Add an approval gate.",
+  severity: "high",
+  appliesWhen: {
+    all: [
+      { toolEffect: "writes", equals: true },
+      { toolEffect: "humanInTheLoop", equals: false },
+      { controlAbsent: "humanOversight" },
+    ],
+  },
+  ref: { instrument: "ai-act", article: "Art. 26(5)", validated: true, source: "test-fixture" },
+};
+
+const deploymentRule: Rule = {
+  id: "test.nis2.in-scope-no-risk-management",
+  category: "nis2-risk-management",
+  scope: "deployment",
+  jurisdictions: ["FR"],
+  title: "In-scope system with no risk management",
+  severity: "high",
+  appliesWhen: {
+    all: [{ deploymentTouchesInScopeSystem: true }, { controlAbsent: "riskManagement" }],
+  },
+  ref: { instrument: "nis2", article: "art-x", jurisdiction: "FR", validated: true, source: "t" },
+};
+
+describe("evaluateCondition", () => {
+  it("matches a tool predicate and a deployment predicate together", () => {
+    const tool = riskyInventory.servers[0]?.tools[0];
+    expect(tool).toBeDefined();
+    if (!tool) return;
+    const matched = evaluateCondition(writeRule.appliesWhen, {
+      deployment: riskyInventory.deployment,
+      tool,
+    });
+    expect(matched).toBe(true);
+  });
+});
+
+describe("evaluate", () => {
+  it("produces a finding when a tool-scoped rule matches a tool", () => {
+    const findings = evaluate(riskyInventory, [writeRule], "FR");
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.ruleId).toBe(writeRule.id);
+    expect(findings[0]?.evidence).toContain("write_file");
+  });
+
+  it("throws a MissingReferenceError when a matched rule has a null reference", () => {
+    const noRef: Rule = { ...writeRule, id: "test.no-ref", ref: null };
+    expect(() => evaluate(riskyInventory, [noRef], "FR")).toThrow(MissingReferenceError);
+  });
+
+  it("skips a national rule for a different jurisdiction", () => {
+    const italianOnly: Rule = { ...writeRule, jurisdictions: ["IT"] };
+    expect(evaluate(riskyInventory, [italianOnly], "FR")).toHaveLength(0);
+  });
+
+  it("applies an EU rule to any member-state jurisdiction", () => {
+    expect(evaluate(riskyInventory, [writeRule], "DE")).toHaveLength(1);
+  });
+
+  it("evaluates a deployment-scoped rule once, with deployment evidence", () => {
+    const findings = evaluate(riskyInventory, [deploymentRule], "FR");
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.evidence).toContain("deployment:");
+  });
+
+  it("fails loud on the shipped seed rules, which have no references yet", () => {
+    const seed = loadAllRules().rules;
+    expect(() => evaluate(riskyInventory, seed, "FR")).toThrow(MissingReferenceError);
+  });
+});

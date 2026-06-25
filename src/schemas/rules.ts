@@ -68,9 +68,18 @@ export type RuleCategory = z.infer<typeof RuleCategorySchema>;
 export const SeveritySchema = z.enum(["info", "low", "medium", "high"]);
 export type Severity = z.infer<typeof SeveritySchema>;
 
+/**
+ * Whether a rule is evaluated once per tool (evidence is the tool) or once for
+ * the whole deployment (evidence is the deployment). Deployment-scoped rules use
+ * only deployment-level conditions.
+ */
+export const RuleScopeSchema = z.enum(["tool", "deployment"]);
+export type RuleScope = z.infer<typeof RuleScopeSchema>;
+
 export const RuleSchema = z.object({
   id: z.string().min(1),
   category: RuleCategorySchema,
+  scope: RuleScopeSchema.default("tool"),
   jurisdictions: z.array(JurisdictionSchema).min(1),
   /** Operational title. Not a legal claim. */
   title: z.string().min(1),
