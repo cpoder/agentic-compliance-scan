@@ -8,6 +8,7 @@ const stubFindings: Finding[] = [
     ruleId: "ai-act.human-oversight.writing-tool-no-approval",
     category: "human-oversight",
     severity: "high",
+    baseSeverity: "high",
     title: "Writing tool runs without a human approval step",
     guidance: "Add an approval gate before the tool can write.",
     jurisdiction: "FR",
@@ -18,7 +19,8 @@ const stubFindings: Finding[] = [
       validated: true,
       source: "test-fixture",
     },
-    evidence: "server:filesystem tool:write_file",
+    evidence: ["filesystem:write_file"],
+    riskScore: 301,
   },
 ];
 

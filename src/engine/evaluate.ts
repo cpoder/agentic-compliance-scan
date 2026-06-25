@@ -2,6 +2,7 @@ import type { Finding } from "../schemas/findings.js";
 import type { Inventory } from "../schemas/inventory.js";
 import type { Jurisdiction, LegalRef, Rule } from "../schemas/rules.js";
 import { evaluateCondition } from "./condition.js";
+import { escalateSeverity, riskScore, toolBlastRadius } from "./risk.js";
 
 /**
  * Thrown when a rule matches the inventory but carries no reference that binds
@@ -47,24 +48,37 @@ function resolveReference(rule: Rule, jurisdiction: Jurisdiction): LegalRef | un
   return rule.references.find((reference) => reference.jurisdiction === "EU");
 }
 
-function toFinding(rule: Rule, jurisdiction: Jurisdiction, evidence: string): Finding {
+function buildFinding(
+  rule: Rule,
+  jurisdiction: Jurisdiction,
+  evidence: string[],
+  blast: number,
+): Finding {
   const reference = resolveReference(rule, jurisdiction);
   if (reference === undefined) {
     throw new MissingReferenceError(rule.id);
   }
+  const severity = escalateSeverity(rule.severity, blast);
   return {
     ruleId: rule.id,
     category: rule.category,
-    severity: rule.severity,
+    severity,
+    baseSeverity: rule.severity,
     title: rule.title,
     guidance: rule.guidance,
     jurisdiction,
     ref: reference,
     evidence,
+    riskScore: riskScore(severity, blast),
   };
 }
 
-/** Apply the rules to the inventory and return the findings for the jurisdiction. */
+/**
+ * Apply the rules to the inventory and return the findings for the jurisdiction,
+ * most urgent first. A tool-scoped rule produces ONE finding listing every tool
+ * that triggered it (not one finding per tool), and its severity is escalated by
+ * the blast radius of those tools.
+ */
 export function evaluate(
   inventory: Inventory,
   rules: Rule[],
@@ -77,17 +91,25 @@ export function evaluate(
     }
     if (rule.scope === "deployment") {
       if (evaluateCondition(rule.appliesWhen, { deployment: inventory.deployment })) {
-        findings.push(toFinding(rule, jurisdiction, `deployment:${inventory.deployment.name}`));
+        const evidence = [`deployment:${inventory.deployment.name}`];
+        findings.push(buildFinding(rule, jurisdiction, evidence, 0));
       }
       continue;
     }
+    const evidence: string[] = [];
+    let blast = 0;
     for (const server of inventory.servers) {
       for (const tool of server.tools) {
         if (evaluateCondition(rule.appliesWhen, { deployment: inventory.deployment, tool })) {
-          findings.push(toFinding(rule, jurisdiction, `server:${server.name} tool:${tool.name}`));
+          evidence.push(`${server.name}:${tool.name}`);
+          blast = Math.max(blast, toolBlastRadius(tool));
         }
       }
     }
+    if (evidence.length > 0) {
+      findings.push(buildFinding(rule, jurisdiction, evidence, blast));
+    }
   }
+  findings.sort((a, b) => b.riskScore - a.riskScore);
   return findings;
 }

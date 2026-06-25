@@ -100,7 +100,7 @@ describe("evaluate", () => {
     const findings = evaluate(riskyInventory, [writeRule], "FR");
     expect(findings).toHaveLength(1);
     expect(findings[0]?.ruleId).toBe(writeRule.id);
-    expect(findings[0]?.evidence).toContain("write_file");
+    expect(findings[0]?.evidence.join(" ")).toContain("write_file");
   });
 
   it("throws a MissingReferenceError when a matched rule has no reference", () => {
@@ -120,7 +120,70 @@ describe("evaluate", () => {
   it("evaluates a deployment-scoped rule once, with deployment evidence", () => {
     const findings = evaluate(riskyInventory, [deploymentRule], "FR");
     expect(findings).toHaveLength(1);
-    expect(findings[0]?.evidence).toContain("deployment:");
+    expect(findings[0]?.evidence.join(" ")).toContain("deployment:");
+  });
+
+  it("collapses a tool-scoped rule into one finding listing all triggering tools", () => {
+    const twoTools = InventorySchema.parse({
+      deployment: { name: "d", inScopeSystems: [] },
+      servers: [
+        {
+          name: "fs",
+          tools: [
+            {
+              name: "write_a",
+              effects: {
+                sideEffects: true,
+                externalAccess: false,
+                writes: true,
+                humanInTheLoop: false,
+              },
+            },
+            {
+              name: "write_b",
+              effects: {
+                sideEffects: true,
+                externalAccess: false,
+                writes: true,
+                humanInTheLoop: false,
+              },
+            },
+          ],
+        },
+      ],
+    });
+    const findings = evaluate(twoTools, [writeRule], "EU");
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.evidence).toEqual(["fs:write_a", "fs:write_b"]);
+  });
+
+  it("escalates severity by the blast radius of a credential-handling admin tool", () => {
+    const adminInv = InventorySchema.parse({
+      deployment: { name: "d", inScopeSystems: [] },
+      servers: [
+        {
+          name: "iam",
+          tools: [
+            {
+              name: "create_user",
+              effects: {
+                sideEffects: true,
+                externalAccess: true,
+                writes: true,
+                humanInTheLoop: false,
+                scope: ["admin"],
+                dataCategories: ["credentials"],
+              },
+            },
+          ],
+        },
+      ],
+    });
+    const mediumRule: Rule = { ...writeRule, id: "test.medium", severity: "medium" };
+    const findings = evaluate(adminInv, [mediumRule], "EU");
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.baseSeverity).toBe("medium");
+    expect(findings[0]?.severity).toBe("high");
   });
 
   it("evaluates the shipped seed rules: NIS2 fires, AI Act stays gated off", () => {

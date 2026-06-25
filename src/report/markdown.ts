@@ -26,9 +26,7 @@ function formatRef(finding: Finding): string {
 }
 
 function sortFindings(findings: Finding[]): Finding[] {
-  return [...findings].sort(
-    (a, b) => SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity),
-  );
+  return [...findings].sort((a, b) => b.riskScore - a.riskScore);
 }
 
 export function renderMarkdown(report: ReportInput): string {
@@ -90,8 +88,13 @@ export function renderMarkdown(report: ReportInput): string {
       lines.push(`### [${finding.severity}] ${finding.title}`);
       lines.push("");
       lines.push(`- Category: ${finding.category}`);
+      if (finding.severity !== finding.baseSeverity) {
+        lines.push(
+          `- Severity: ${finding.severity} (escalated from ${finding.baseSeverity} by the blast radius of the triggering tools)`,
+        );
+      }
       lines.push(`- Rule: ${finding.ruleId}`);
-      lines.push(`- Evidence: ${finding.evidence}`);
+      lines.push(`- Triggered by: ${finding.evidence.join(", ")}`);
       lines.push(`- Reference: ${formatRef(finding)}`);
       if (finding.guidance) {
         lines.push(`- Guidance: ${finding.guidance}`);

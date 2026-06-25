@@ -9,11 +9,16 @@ import type { Jurisdiction, LegalRef, RuleCategory, Severity } from "./rules.js"
 export interface Finding {
   ruleId: string;
   category: RuleCategory;
+  /** Severity after blast-radius escalation by the triggering tools. */
   severity: Severity;
+  /** The rule's declared severity, before escalation. */
+  baseSeverity: Severity;
   title: string;
   guidance?: string;
   jurisdiction: Jurisdiction;
   ref: LegalRef;
-  /** Where in the inventory this triggered, e.g. "server:filesystem tool:write_file". */
-  evidence: string;
+  /** Everything that triggered the rule: the tools (one finding lists them all) or the deployment. */
+  evidence: string[];
+  /** Sort key; higher means more urgent. Severity dominates, blast radius breaks ties. */
+  riskScore: number;
 }
