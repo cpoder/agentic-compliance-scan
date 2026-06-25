@@ -56,20 +56,48 @@ export function renderMarkdown(report: ReportInput): string {
   );
   lines.push(`${summary.total} gap(s) found (${counts.join(", ")}).`);
   lines.push("");
-  lines.push("## Findings");
-  lines.push("");
+  const hasNonBinding = report.findings.some(
+    (finding) => finding.ref.status === "draft" || finding.ref.status === "deferred",
+  );
+  if (hasNonBinding) {
+    lines.push(
+      "Some citations are not yet binding (draft or deferred): they are marked inline below.",
+    );
+    lines.push("");
+  }
 
+  // Findings grouped by the jurisdiction of the citation: national law first,
+  // then the EU Regulation (AI Act).
+  const groups = new Map<string, Finding[]>();
   for (const finding of sortFindings(report.findings)) {
-    lines.push(`### [${finding.severity}] ${finding.title}`);
+    const key = finding.ref.jurisdiction;
+    const list = groups.get(key) ?? [];
+    list.push(finding);
+    groups.set(key, list);
+  }
+  const orderedKeys = [...groups.keys()].sort((a, b) => {
+    if (a === "EU") return 1;
+    if (b === "EU") return -1;
+    if (a === report.jurisdiction) return -1;
+    if (b === report.jurisdiction) return 1;
+    return a.localeCompare(b);
+  });
+
+  for (const key of orderedKeys) {
+    lines.push(key === "EU" ? "## EU regulation (AI Act)" : `## National law (${key})`);
     lines.push("");
-    lines.push(`- Category: ${finding.category}`);
-    lines.push(`- Rule: ${finding.ruleId}`);
-    lines.push(`- Evidence: ${finding.evidence}`);
-    lines.push(`- Reference: ${formatRef(finding)}`);
-    if (finding.guidance) {
-      lines.push(`- Guidance: ${finding.guidance}`);
+    for (const finding of groups.get(key) ?? []) {
+      lines.push(`### [${finding.severity}] ${finding.title}`);
+      lines.push("");
+      lines.push(`- Category: ${finding.category}`);
+      lines.push(`- Rule: ${finding.ruleId}`);
+      lines.push(`- Evidence: ${finding.evidence}`);
+      lines.push(`- Reference: ${formatRef(finding)}`);
+      if (finding.guidance) {
+        lines.push(`- Guidance: ${finding.guidance}`);
+      }
+      lines.push("");
     }
-    lines.push("");
   }
 
   return `${lines.join("\n").trimEnd()}\n`;

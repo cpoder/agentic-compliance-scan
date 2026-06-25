@@ -1,0 +1,33 @@
+{
+  "deployment": {
+    "name": "billing-agent",
+    "isHighRiskAiSystem": true,
+    "inScopeSystems": ["billing"],
+    "controls": {
+      "recordKeeping": false,
+      "humanOversight": false,
+      "transparencyNotice": false,
+      "riskManagement": false
+    }
+  },
+  "servers": [
+    {
+      "name": "filesystem",
+      "transport": "stdio",
+      "tools": [
+        {
+          "name": "write_invoice",
+          "description": "Write an invoice file.",
+          "effects": {
+            "sideEffects": true,
+            "externalAccess": false,
+            "writes": true,
+            "humanInTheLoop": false,
+            "scope": ["fs:write"],
+            "dataCategories": []
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
+import { evaluate } from "./engine/evaluate.js";
 import { loadClaudeDesktopConfigFile } from "./ingest/claude-desktop.js";
 import { loadInventoryFile } from "./ingest/inventory.js";
+import { renderReport } from "./report/index.js";
+import { loadAllRules } from "./rules/index.js";
+import type { Finding } from "./schemas/findings.js";
 import type { Inventory } from "./schemas/inventory.js";
 import { JurisdictionSchema } from "./schemas/rules.js";
 
@@ -24,10 +28,7 @@ Options:
 This is not legal advice.
 `;
 
-/**
- * Parse arguments, ingest the inventory, and summarize what was parsed. Rule
- * evaluation and report rendering are wired in the next phase.
- */
+/** Parse arguments, ingest the inventory, evaluate the rules, and print the report. */
 export function run(argv: string[]): number {
   const { values } = parseArgs({
     args: argv,
@@ -68,11 +69,26 @@ export function run(argv: string[]): number {
     return 1;
   }
 
-  const toolCount = inventory.servers.reduce((sum, server) => sum + server.tools.length, 0);
-  process.stdout.write(
-    `Parsed inventory "${inventory.deployment.name}" for ${jurisdiction.data}: ${inventory.servers.length} server(s), ${toolCount} tool(s).\n`,
+  let findings: Finding[];
+  try {
+    findings = evaluate(inventory, loadAllRules().rules, jurisdiction.data);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`evaluation failed: ${message}\n`);
+    return 1;
+  }
+
+  const format = values.format === "json" ? "json" : "md";
+  const report = renderReport(
+    {
+      deployment: inventory.deployment.name,
+      jurisdiction: jurisdiction.data,
+      generatedAt: new Date().toISOString(),
+      findings,
+    },
+    format,
   );
-  process.stdout.write("Rule evaluation and report rendering are wired in the next phase.\n");
+  process.stdout.write(report);
   return 0;
 }
 
