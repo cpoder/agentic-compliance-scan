@@ -1,0 +1,34 @@
+{
+  "deployment": {
+    "name": "example-agent-deployment",
+    "inScopeSystems": [],
+    "controls": {
+      "recordKeeping": false,
+      "humanOversight": false,
+      "transparencyNotice": false,
+      "riskManagement": false
+    }
+  },
+  "servers": [
+    {
+      "name": "filesystem",
+      "transport": "stdio",
+      "tools": [
+        {
+          "name": "write_file",
+          "description": "Write content to a file on disk.",
+          "effects": {
+            "sideEffects": true,
+            "externalAccess": false,
+            "writes": true,
+            "humanInTheLoop": false,
+            "scope": ["fs:write"],
+            "dataCategories": []
+          }
+        }
+      ],
+      "resources": [],
+      "prompts": []
+    }
+  ]
+}

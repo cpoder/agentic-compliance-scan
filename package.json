@@ -1,0 +1,37 @@
+{
+  "name": "agentic-compliance-scan",
+  "version": "0.0.0",
+  "description": "Static gap-scan of an MCP agent deployment against AI Act deployer obligations and NIS2, grouped by jurisdiction. Not legal advice.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "agentic-compliance-scan": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "src/rules/data"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsc -p tsconfig.build.json && node scripts/copy-rules-data.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "gate": "biome check . && tsc --noEmit && vitest run"
+  },
+  "packageManager": "pnpm@10.7.0",
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.1",
+    "@types/node": "^26.0.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}
