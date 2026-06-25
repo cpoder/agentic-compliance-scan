@@ -54,7 +54,15 @@ const writeRule: Rule = {
       { controlAbsent: "humanOversight" },
     ],
   },
-  ref: { instrument: "ai-act", article: "Art. 26(5)", validated: true, source: "test-fixture" },
+  references: [
+    {
+      instrument: "ai-act",
+      jurisdiction: "EU",
+      article: "Art. 26(5)",
+      validated: true,
+      source: "test-fixture",
+    },
+  ],
 };
 
 const deploymentRule: Rule = {
@@ -67,7 +75,16 @@ const deploymentRule: Rule = {
   appliesWhen: {
     all: [{ deploymentTouchesInScopeSystem: true }, { controlAbsent: "riskManagement" }],
   },
-  ref: { instrument: "nis2", article: "art-x", jurisdiction: "FR", validated: true, source: "t" },
+  references: [
+    {
+      instrument: "nis2",
+      jurisdiction: "FR",
+      article: "art-x",
+      nationalRef: "loi-fr",
+      validated: true,
+      source: "t",
+    },
+  ],
 };
 
 describe("evaluateCondition", () => {
@@ -91,8 +108,8 @@ describe("evaluate", () => {
     expect(findings[0]?.evidence).toContain("write_file");
   });
 
-  it("throws a MissingReferenceError when a matched rule has a null reference", () => {
-    const noRef: Rule = { ...writeRule, id: "test.no-ref", ref: null };
+  it("throws a MissingReferenceError when a matched rule has no reference", () => {
+    const noRef: Rule = { ...writeRule, id: "test.no-ref", references: [] };
     expect(() => evaluate(riskyInventory, [noRef], "FR")).toThrow(MissingReferenceError);
   });
 

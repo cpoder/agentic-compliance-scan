@@ -31,6 +31,6 @@ describe("rule data", () => {
   it("ships valid rule sets whose references are not yet populated", () => {
     const { rules } = loadAllRules();
     expect(rules.length).toBeGreaterThan(0);
-    expect(rules.every((rule) => rule.ref === null)).toBe(true);
+    expect(rules.every((rule) => rule.references.length === 0)).toBe(true);
   });
 });

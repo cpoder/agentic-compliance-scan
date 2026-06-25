@@ -11,7 +11,7 @@
       "appliesWhen": {
         "all": [{ "deploymentTouchesInScopeSystem": true }, { "controlAbsent": "riskManagement" }]
       },
-      "ref": null
+      "references": []
     },
     {
       "id": "nis2.risk-management.in-scope-no-record-keeping",
@@ -24,7 +24,7 @@
       "appliesWhen": {
         "all": [{ "deploymentTouchesInScopeSystem": true }, { "controlAbsent": "recordKeeping" }]
       },
-      "ref": null
+      "references": []
     },
     {
       "id": "nis2.risk-management.in-scope-no-human-oversight",
@@ -37,7 +37,7 @@
       "appliesWhen": {
         "all": [{ "deploymentTouchesInScopeSystem": true }, { "controlAbsent": "humanOversight" }]
       },
-      "ref": null
+      "references": []
     }
   ]
 }

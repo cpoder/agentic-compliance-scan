@@ -14,7 +14,7 @@
           { "controlAbsent": "recordKeeping" }
         ]
       },
-      "ref": null
+      "references": []
     },
     {
       "id": "ai-act.record-keeping.external-access-tool-no-logs",
@@ -30,7 +30,7 @@
           { "controlAbsent": "recordKeeping" }
         ]
       },
-      "ref": null
+      "references": []
     },
     {
       "id": "ai-act.record-keeping.writing-tool-no-logs",
@@ -43,7 +43,7 @@
       "appliesWhen": {
         "all": [{ "toolEffect": "writes", "equals": true }, { "controlAbsent": "recordKeeping" }]
       },
-      "ref": null
+      "references": []
     },
     {
       "id": "ai-act.human-oversight.writing-tool-no-approval",
@@ -60,7 +60,7 @@
           { "controlAbsent": "humanOversight" }
         ]
       },
-      "ref": null
+      "references": []
     },
     {
       "id": "ai-act.human-oversight.state-changing-tool-no-approval",
@@ -77,7 +77,7 @@
           { "controlAbsent": "humanOversight" }
         ]
       },
-      "ref": null
+      "references": []
     },
     {
       "id": "ai-act.human-oversight.external-tool-no-approval",
@@ -94,7 +94,7 @@
           { "controlAbsent": "humanOversight" }
         ]
       },
-      "ref": null
+      "references": []
     },
     {
       "id": "ai-act.transparency.personal-data-no-notice",
@@ -107,7 +107,7 @@
       "appliesWhen": {
         "all": [{ "toolDataCategory": "personal-data" }, { "controlAbsent": "transparencyNotice" }]
       },
-      "ref": null
+      "references": []
     },
     {
       "id": "ai-act.transparency.credentials-no-notice",
@@ -120,7 +120,7 @@
       "appliesWhen": {
         "all": [{ "toolDataCategory": "credentials" }, { "controlAbsent": "transparencyNotice" }]
       },
-      "ref": null
+      "references": []
     },
     {
       "id": "ai-act.transparency.external-flow-no-notice",
@@ -136,7 +136,7 @@
           { "controlAbsent": "transparencyNotice" }
         ]
       },
-      "ref": null
+      "references": []
     }
   ]
 }

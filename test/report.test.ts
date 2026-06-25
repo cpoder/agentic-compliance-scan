@@ -11,7 +11,13 @@ const stubFindings: Finding[] = [
     title: "Writing tool runs without a human approval step",
     guidance: "Add an approval gate before the tool can write.",
     jurisdiction: "FR",
-    ref: { instrument: "ai-act", article: "Art. 26(5)", validated: true, source: "test-fixture" },
+    ref: {
+      instrument: "ai-act",
+      jurisdiction: "EU",
+      article: "Art. 26(5)",
+      validated: true,
+      source: "test-fixture",
+    },
     evidence: "server:filesystem tool:write_file",
   },
 ];

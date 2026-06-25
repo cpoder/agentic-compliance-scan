@@ -42,14 +42,25 @@ export const ConditionSchema: z.ZodType<Condition> = z.lazy(() =>
 );
 
 /**
- * The legal anchor of a rule. Supplied from a validated source, never invented
- * by a model. `source` records provenance. `validated` stays false until the
- * maintainer confirms the reference and the rule-to-obligation mapping.
+ * The legal anchor of a rule, for one jurisdiction. Supplied from a validated
+ * source, never invented by a model. `source` records provenance. `validated`
+ * stays false until the maintainer confirms the reference and the
+ * rule-to-obligation mapping.
+ *
+ * The `jurisdiction` is where this reference is the binding citation:
+ *   - "EU" for a directly-applicable Regulation (the AI Act): the EU article is
+ *     cited as-is in every member state.
+ *   - a country code for a transposed Directive (NIS2): the citation is that
+ *     country's national transposition (`article` + `nationalRef`), NEVER the
+ *     Directive article, because the Directive does not bind the entity once a
+ *     country has transposed it.
  */
 export const LegalRefSchema = z.object({
   instrument: z.enum(["ai-act", "nis2"]),
+  jurisdiction: JurisdictionSchema,
+  /** The cited provision: the AI Act article, or the national transposition article. */
   article: z.string().min(1),
-  jurisdiction: JurisdictionSchema.optional(),
+  /** For a national citation, the law or decree that carries the article. */
   nationalRef: z.string().optional(),
   sourceUrl: z.string().url().optional(),
   source: z.string().optional(),
@@ -87,8 +98,13 @@ export const RuleSchema = z.object({
   guidance: z.string().optional(),
   severity: SeveritySchema,
   appliesWhen: ConditionSchema,
-  /** Null until a reference is sourced and validated. */
-  ref: LegalRefSchema.nullable(),
+  /**
+   * One reference per jurisdiction this rule applies in. Empty until references
+   * are sourced and validated. The engine resolves the reference for the
+   * requested jurisdiction and fails loud when none resolves, so a finding never
+   * surfaces without a citation that binds in that country.
+   */
+  references: z.array(LegalRefSchema).default([]),
 });
 export type Rule = z.infer<typeof RuleSchema>;
 

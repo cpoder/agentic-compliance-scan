@@ -1,19 +1,20 @@
 import type { Finding } from "../schemas/findings.js";
 import type { Inventory } from "../schemas/inventory.js";
-import type { Jurisdiction, Rule } from "../schemas/rules.js";
+import type { Jurisdiction, LegalRef, Rule } from "../schemas/rules.js";
 import { evaluateCondition } from "./condition.js";
 
 /**
- * Thrown when a rule matches the inventory but carries no legal reference. The
- * engine refuses to surface a finding that does not trace to a reference, so a
- * null `ref` is a loud failure rather than a silent omission.
+ * Thrown when a rule matches the inventory but carries no reference that binds
+ * in the requested jurisdiction. The engine refuses to surface a finding that
+ * does not trace to a citation, so a missing reference is a loud failure rather
+ * than a silent omission.
  */
 export class MissingReferenceError extends Error {
   readonly ruleId: string;
   constructor(ruleId: string) {
     super(
-      `rule "${ruleId}" matched the inventory but has no legal reference (ref is null). ` +
-        "Source and validate its reference before running against real data.",
+      `rule "${ruleId}" matched the inventory but has no reference for the requested ` +
+        "jurisdiction. Source and validate its references before running against real data.",
     );
     this.name = "MissingReferenceError";
     this.ruleId = ruleId;
@@ -32,8 +33,23 @@ function ruleAppliesToJurisdiction(rule: Rule, jurisdiction: Jurisdiction): bool
   return rule.jurisdictions.includes(jurisdiction);
 }
 
+/**
+ * Resolve the reference that binds in the requested jurisdiction. An exact
+ * national match wins; otherwise an EU reference (a directly-applicable
+ * Regulation such as the AI Act) applies. A Directive is never a fallback: a
+ * transposed obligation must cite national law or it does not surface.
+ */
+function resolveReference(rule: Rule, jurisdiction: Jurisdiction): LegalRef | undefined {
+  const national = rule.references.find((reference) => reference.jurisdiction === jurisdiction);
+  if (national) {
+    return national;
+  }
+  return rule.references.find((reference) => reference.jurisdiction === "EU");
+}
+
 function toFinding(rule: Rule, jurisdiction: Jurisdiction, evidence: string): Finding {
-  if (rule.ref === null) {
+  const reference = resolveReference(rule, jurisdiction);
+  if (reference === undefined) {
     throw new MissingReferenceError(rule.id);
   }
   return {
@@ -43,7 +59,7 @@ function toFinding(rule: Rule, jurisdiction: Jurisdiction, evidence: string): Fi
     title: rule.title,
     guidance: rule.guidance,
     jurisdiction,
-    ref: rule.ref,
+    ref: reference,
     evidence,
   };
 }
