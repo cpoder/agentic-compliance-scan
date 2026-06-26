@@ -14,12 +14,13 @@ printf '\n%s\n' "${B}# Step 2: scan against the law, for Germany${R}"
 printf '%s\n' "${D}\$ agentic-compliance-scan --inventory my-agent.json --jurisdiction DE${R}"
 $A --inventory examples/wm-ops-agent.inventory.json --jurisdiction DE 2>/dev/null | grep -E '^[0-9]+ gap|National law|^### |Reference:' | head -4
 sleep 3
-printf '\n%s\n' "${B}# Step 3: the gateway rules to lock down the dangerous tools${R}"
+printf '\n%s\n' "${B}# Step 3: recommend the policy to lock down the dangerous tools, on any gateway${R}"
 printf '%s\n' "${D}\$ agentic-compliance-scan --policy my-agent.json${R}"
-$A --policy examples/wm-ops-agent.inventory.json 2>/dev/null | grep -E '^## wm|webMethods condition|webMethods action' | head -6
+$A --policy examples/wm-ops-agent.inventory.json 2>/dev/null | grep -E '^## wm|^- Match:' | head -4
+printf '%s\n' "${D}# add --gateway webmethods (or envoy) for a ready-to-paste snippet${R}"
 sleep 3
 printf '\n%s\n' "${Y}${B}# The full loop:${R}"
 printf '%s\n' "${Y}# discover a real MCP server, cite the gaps in your own national law,${R}"
-printf '%s\n' "${Y}# and generate the gateway policy to close them. In seconds.${R}"
+printf '%s\n' "${Y}# and recommend the policy to close them, on any gateway. In seconds.${R}"
 printf '%s\n' "${D}# github.com/cpoder/agentic-compliance-scan${R}"
 sleep 3
