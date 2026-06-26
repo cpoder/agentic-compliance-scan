@@ -1,4 +1,7 @@
 {
+  "files": {
+    "includes": ["**", "!assets/**"]
+  },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
