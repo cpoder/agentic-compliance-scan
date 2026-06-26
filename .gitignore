@@ -2,3 +2,8 @@ node_modules/
 dist/
 *.log
 .DS_Store
+
+# local discovery scratch
+mcp-config.json
+my-agent.json
+inventory.json

@@ -1,8 +1,10 @@
 # agentic-compliance-scan
 
-A small CLI that reads a static inventory of an MCP agent deployment and reports where it falls short of EU AI Act deployer obligations and NIS2, for one jurisdiction at a time.
+A small open-source CLI that discovers your MCP servers' tools and reports where your agent deployment falls short of the EU AI Act and NIS2, citing the national law that actually binds you (the Italian decree for Italy, the BSIG for Germany), not the directive.
 
-You describe what your agent can do (its MCP servers and tools, and the governance controls you have in place). The tool evaluates a set of declarative rules and prints a gap report. Every gap it raises cites a specific legal provision: the AI Act article for the Regulation, and the national transposition article for NIS2 (the Italian decree for Italy, the Belgian law for Belgium, and so on), never the Directive itself.
+[![Discovering an MCP server and scanning it for AI Act and NIS2 gaps](assets/demo.svg)](https://asciinema.org/a/cMQOYTP152kps3BN)
+
+You describe what your agent can do, or let the tool discover it. It evaluates a set of declarative rules and prints a gap report where every gap cites a specific legal provision: the AI Act article for the Regulation, and the national transposition for NIS2, never the Directive itself.
 
 ## What it does
 
