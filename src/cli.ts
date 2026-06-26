@@ -7,6 +7,7 @@ import { buildDraftInventory, type McpConfig } from "./discover/index.js";
 import { evaluate } from "./engine/evaluate.js";
 import { loadClaudeDesktopConfigFile } from "./ingest/claude-desktop.js";
 import { loadInventoryFile } from "./ingest/inventory.js";
+import { GATEWAY_ADAPTERS, GATEWAY_NAMES } from "./policy/gateways/index.js";
 import { recommendPolicies } from "./policy/recommend.js";
 import { renderPolicyMarkdown } from "./policy/render.js";
 import { renderReport } from "./report/index.js";
@@ -23,12 +24,13 @@ and NIS2, grouped by jurisdiction.
 Usage:
   agentic-compliance-scan --inventory <file.json> --jurisdiction <EU|FR|IT|PT|BE|DE|AT> [--format md|json]
   agentic-compliance-scan --discover <mcp-config.json> [--name <deployment>] > inventory.json
-  agentic-compliance-scan --policy <inventory.json> [--format md|json]
+  agentic-compliance-scan --policy <inventory.json> [--gateway webmethods|envoy] [--format md|json]
 
 Options:
   --inventory <file>       Path to a static inventory JSON file.
   --discover <file>        Connect to the MCP servers in a config (claude_desktop_config.json or .mcp.json), list their tools, classify the effects, and write a draft inventory to stdout for review.
-  --policy <file>          Recommend gateway policies to restrict the inventory's high-risk tools, with a webMethods API Gateway artifact (buildable, not a native feature).
+  --policy <file>          Recommend gateway-agnostic policies to restrict the inventory's high-risk tools, ranked by blast radius (buildable, not a native gateway feature).
+  --gateway <name>         With --policy, also render a product-specific snippet. One of: webmethods, envoy.
   --name <deployment>      Deployment name for a discovered inventory. Defaults to discovered-deployment.
   --claude-desktop <file>  Path to a claude_desktop_config.json to import as a skeleton inventory.
   --jurisdiction <code>    Jurisdiction to report against. Defaults to EU.
@@ -60,6 +62,7 @@ export function run(argv: string[]): number {
       inventory: { type: "string" },
       "claude-desktop": { type: "string" },
       policy: { type: "string" },
+      gateway: { type: "string" },
       jurisdiction: { type: "string", default: "EU" },
       format: { type: "string", default: "md" },
       help: { type: "boolean", short: "h", default: false },
@@ -80,13 +83,25 @@ export function run(argv: string[]): number {
       process.stderr.write(`failed to load inventory: ${formatLoadError(error)}\n`);
       return 1;
     }
+    const adapter = values.gateway === undefined ? undefined : GATEWAY_ADAPTERS[values.gateway];
+    if (values.gateway !== undefined && adapter === undefined) {
+      process.stderr.write(
+        `unknown gateway: ${values.gateway}. Available: ${GATEWAY_NAMES.join(", ")}\n`,
+      );
+      return 1;
+    }
     const recommendations = recommendPolicies(inventory);
     if (values.format === "json") {
+      const enriched = adapter
+        ? recommendations.map((rec) => ({ ...rec, gateway: adapter(rec) }))
+        : recommendations;
       process.stdout.write(
-        `${JSON.stringify({ deployment: inventory.deployment.name, recommendations }, null, 2)}\n`,
+        `${JSON.stringify({ deployment: inventory.deployment.name, recommendations: enriched }, null, 2)}\n`,
       );
     } else {
-      process.stdout.write(renderPolicyMarkdown(recommendations, inventory.deployment.name));
+      process.stdout.write(
+        renderPolicyMarkdown(recommendations, inventory.deployment.name, adapter),
+      );
     }
     return 0;
   }

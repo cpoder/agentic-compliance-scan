@@ -107,13 +107,20 @@ The engine is code; the legal content is data. Every reference lives in `src/rul
 
 ## Gateway policy recommendations
 
-A gap report tells you which obligations you are missing. `--policy <inventory.json>` goes one step further: for each high-risk tool (admin scope, credentials, write access, or the ability to shut things down), it recommends a gateway policy that restricts it, ranked by blast radius. Each recommendation is portable, plus a webMethods API Gateway artifact: a condition that matches the tool by inspecting the `tools/call` body (`params.name`), and the action that denies it, holds it for human approval, or restricts the callers.
-
-This is buildable, not a native feature. No MCP gateway today, IBM's included, gates on `params.name` out of the box, so the output is honest about what you would build and points at the coarser native lever (restricting which tools surface by OAuth scope). Only the Streamable HTTP transport works, since each tool call must arrive as a discrete request the gateway can inspect.
+A gap report tells you which obligations you are missing. `--policy <inventory.json>` goes one step further: for each high-risk tool (admin scope, credentials, write access, or the ability to shut things down), it recommends a policy that restricts it, ranked by blast radius. The output is gateway-agnostic by default: the intent (deny, require approval, or restrict callers), and the fact that the policy has to match on the tool name inside the `tools/call` body, since that is where the tool lives, not in the URL.
 
 ```
 node dist/cli.js --policy inventory.json
 ```
+
+Add `--gateway <name>` to also render a product-specific snippet from the same recommendation. Two adapters ship today, and adding one is a single file:
+
+```
+node dist/cli.js --policy inventory.json --gateway webmethods
+node dist/cli.js --policy inventory.json --gateway envoy
+```
+
+This is buildable, not a native feature. No MCP gateway today gates on `params.name` out of the box, so the output is honest about what you would build and points at the coarser native lever (restricting which tools surface by OAuth scope). Only the Streamable HTTP transport works, since each tool call must arrive as a discrete request the gateway can inspect.
 
 ## Not legal advice
 
