@@ -54,7 +54,7 @@ Jurisdictions covered today: `EU` (AI Act only), and `FR`, `IT`, `PT`, `BE`, `DE
 
 ## Inventory format
 
-The input is a single JSON object. A minimal example:
+You do not write the server and tool list by hand. `--discover` generates it for you: the servers, their tools, and a first guess at each tool's effects, with low-confidence guesses flagged for review. Your job on the generated file is the deployment-level part (is it high-risk, what is in NIS2 scope, which controls you have) and correcting any effect the classifier got wrong. You can also write or edit the file by hand. This is its shape:
 
 ```json
 {
@@ -97,7 +97,7 @@ A few fields carry the weight of the analysis:
 - `deployment.isHighRiskAiSystem` gates the AI Act Article 26 rules. Those deployer duties bind only for high-risk AI systems, so they do not fire unless you set this to `true`.
 - `deployment.interactsWithPeople` and `deployment.generatesSyntheticContent` gate the AI Act Article 50 transparency rules, which apply regardless of high-risk status.
 - `deployment.inScopeSystems` lists the NIS2 in-scope systems the agent acts on. The NIS2 rules apply only when this is non-empty.
-- each tool's `effects` describe what the tool can observably do (side effects, external access, writes, whether a human approves it, its scope, and the data categories it touches).
+- each tool's `effects` describe what the tool can observably do (writes, side effects, external access, the data categories it touches). `--discover` fills these by classifying the tool's name and description, and flags the uncertain ones for you to correct. `humanInTheLoop` stays false here because whether an invocation is approved is a host policy, not something a server reports through `tools/list`.
 
 The zod schemas in `src/schemas/` are the source of truth for the full shape.
 
