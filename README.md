@@ -2,7 +2,7 @@
 
 A small open-source CLI that discovers your MCP servers' tools and reports where your agent deployment falls short of the EU AI Act and NIS2, citing the national law that actually binds you (the Italian decree for Italy, the BSIG for Germany), not the directive.
 
-[![Discovering an MCP server and scanning it for AI Act and NIS2 gaps](assets/demo.svg)](https://asciinema.org/a/cMQOYTP152kps3BN)
+[![Discovering an MCP server and scanning it for AI Act and NIS2 gaps](assets/demo.svg)](https://asciinema.org/a/tjZJMdrQJoGFVKxR)
 
 You describe what your agent can do, or let the tool discover it. It evaluates a set of declarative rules and prints a gap report where every gap cites a specific legal provision: the AI Act article for the Regulation, and the national transposition for NIS2, never the Directive itself.
 
