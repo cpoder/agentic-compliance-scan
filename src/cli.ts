@@ -1,7 +1,9 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { ZodError } from "zod";
+import { buildDraftInventory, type McpConfig } from "./discover/index.js";
 import { evaluate } from "./engine/evaluate.js";
 import { loadClaudeDesktopConfigFile } from "./ingest/claude-desktop.js";
 import { loadInventoryFile } from "./ingest/inventory.js";
@@ -18,9 +20,12 @@ and NIS2, grouped by jurisdiction.
 
 Usage:
   agentic-compliance-scan --inventory <file.json> --jurisdiction <EU|FR|IT|PT|BE|DE|AT> [--format md|json]
+  agentic-compliance-scan --discover <mcp-config.json> [--name <deployment>] > inventory.json
 
 Options:
   --inventory <file>       Path to a static inventory JSON file.
+  --discover <file>        Connect to the MCP servers in a config (claude_desktop_config.json or .mcp.json), list their tools, classify the effects, and write a draft inventory to stdout for review.
+  --name <deployment>      Deployment name for a discovered inventory. Defaults to discovered-deployment.
   --claude-desktop <file>  Path to a claude_desktop_config.json to import as a skeleton inventory.
   --jurisdiction <code>    Jurisdiction to report against. Defaults to EU.
   --format <md|json>       Output format. Defaults to md.
@@ -106,7 +111,70 @@ export function run(argv: string[]): number {
   return 0;
 }
 
+/**
+ * Discover mode: connect to the MCP servers in a config, classify their tools,
+ * and write a draft inventory to stdout for the user to review and complete.
+ */
+export async function runDiscover(argv: string[]): Promise<number> {
+  const { values } = parseArgs({
+    args: argv,
+    options: {
+      discover: { type: "string" },
+      name: { type: "string", default: "discovered-deployment" },
+      inventory: { type: "string" },
+      "claude-desktop": { type: "string" },
+      jurisdiction: { type: "string" },
+      format: { type: "string" },
+      help: { type: "boolean", short: "h", default: false },
+    },
+    allowPositionals: false,
+  });
+
+  if (values.help || values.discover === undefined) {
+    process.stdout.write(HELP);
+    return values.help ? 0 : 1;
+  }
+
+  let config: McpConfig;
+  try {
+    config = JSON.parse(readFileSync(values.discover, "utf8")) as McpConfig;
+  } catch (error) {
+    process.stderr.write(`failed to read config: ${formatLoadError(error)}\n`);
+    return 1;
+  }
+
+  const { inventory, notes } = await buildDraftInventory(
+    config,
+    values.name ?? "discovered-deployment",
+  );
+  for (const note of notes) {
+    process.stderr.write(`# ${note}\n`);
+  }
+
+  const toolCount = inventory.servers.reduce((sum, server) => sum + server.tools.length, 0);
+  if (toolCount === 0) {
+    process.stderr.write("# no tools discovered; nothing to write\n");
+    return 1;
+  }
+  process.stderr.write(
+    "# draft written to stdout. Review the effects, then set isHighRiskAiSystem, inScopeSystems, and controls before scanning.\n",
+  );
+  process.stdout.write(`${JSON.stringify(inventory, null, 2)}\n`);
+  return 0;
+}
+
 const isMain = process.argv[1] === fileURLToPath(import.meta.url);
 if (isMain) {
-  process.exit(run(process.argv.slice(2)));
+  const argv = process.argv.slice(2);
+  if (argv.includes("--discover")) {
+    runDiscover(argv).then(
+      (code) => process.exit(code),
+      (error) => {
+        process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
+        process.exit(1);
+      },
+    );
+  } else {
+    process.exit(run(argv));
+  }
 }

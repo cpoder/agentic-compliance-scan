@@ -6,16 +6,15 @@ You describe what your agent can do (its MCP servers and tools, and the governan
 
 ## What it does
 
-- Ingests a static inventory in JSON, or imports a `claude_desktop_config.json` as a starting skeleton.
-- Evaluates declarative rules against the inventory and produces findings.
+- Discovers your MCP servers' tools automatically over a `tools/list` handshake and classifies their governance effects into a draft inventory you review. You can also write the inventory by hand, or import a `claude_desktop_config.json` skeleton.
+- Evaluates declarative rules against the inventory and produces findings, one per obligation, with the triggering tools listed.
+- Derives each finding's severity from the blast radius of the tools involved (admin scope, credentials, write access) and sorts the report by real risk.
 - Prints a report in Markdown or JSON, grouped by national law and the EU Regulation, with a severity summary.
 - Cites a validated reference for every finding, and marks a citation that is not yet binding (France is a draft bill; Portugal has one article whose effect is deferred).
 
 ## What it does not do
 
-This is a static scanner. It does not connect to a live MCP server, it does not discover tools at runtime, and it does not monitor, gate, or enforce anything. There is no web UI, no database, and no account. You supply the inventory; the tool reasons over it and stops.
-
-Auto-discovery would need a live connection, which is deliberately out of scope here.
+It does not monitor, intercept, or enforce anything at runtime. There is no gateway, no web UI, no database, and no account. Discovery does a single `tools/list` handshake to read a server's catalog; it never invokes a tool or watches traffic. Whether your system is high-risk, which systems are in NIS2 scope, and which governance controls you have in place stay human inputs that you set on the draft.
 
 ## Install
 
@@ -30,10 +29,17 @@ pnpm build
 
 ## Usage
 
+Discover your servers and write a draft inventory to review:
+
+```
+node dist/cli.js --discover claude_desktop_config.json --name my-agent > inventory.json
+```
+
+Discovery prints progress and review notes to stderr (including any tool whose effects it was unsure about). Review the draft, set `isHighRiskAiSystem`, `inScopeSystems`, and your `controls`, then scan it:
+
 ```
 node dist/cli.js --inventory inventory.json --jurisdiction IT
 node dist/cli.js --inventory inventory.json --jurisdiction FR --format json
-node dist/cli.js --claude-desktop ~/Library/Application\ Support/Claude/claude_desktop_config.json --jurisdiction DE
 ```
 
 During development you can skip the build step:
