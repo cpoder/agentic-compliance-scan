@@ -1,6 +1,6 @@
 {
   "files": {
-    "includes": ["**", "!assets/**"]
+    "includes": ["**", "!assets"]
   },
   "formatter": {
     "enabled": true,

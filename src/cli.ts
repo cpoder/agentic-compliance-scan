@@ -7,6 +7,8 @@ import { buildDraftInventory, type McpConfig } from "./discover/index.js";
 import { evaluate } from "./engine/evaluate.js";
 import { loadClaudeDesktopConfigFile } from "./ingest/claude-desktop.js";
 import { loadInventoryFile } from "./ingest/inventory.js";
+import { recommendPolicies } from "./policy/recommend.js";
+import { renderPolicyMarkdown } from "./policy/render.js";
 import { renderReport } from "./report/index.js";
 import { loadAllRules } from "./rules/index.js";
 import type { Finding } from "./schemas/findings.js";
@@ -21,10 +23,12 @@ and NIS2, grouped by jurisdiction.
 Usage:
   agentic-compliance-scan --inventory <file.json> --jurisdiction <EU|FR|IT|PT|BE|DE|AT> [--format md|json]
   agentic-compliance-scan --discover <mcp-config.json> [--name <deployment>] > inventory.json
+  agentic-compliance-scan --policy <inventory.json> [--format md|json]
 
 Options:
   --inventory <file>       Path to a static inventory JSON file.
   --discover <file>        Connect to the MCP servers in a config (claude_desktop_config.json or .mcp.json), list their tools, classify the effects, and write a draft inventory to stdout for review.
+  --policy <file>          Recommend gateway policies to restrict the inventory's high-risk tools, with a webMethods API Gateway artifact (buildable, not a native feature).
   --name <deployment>      Deployment name for a discovered inventory. Defaults to discovered-deployment.
   --claude-desktop <file>  Path to a claude_desktop_config.json to import as a skeleton inventory.
   --jurisdiction <code>    Jurisdiction to report against. Defaults to EU.
@@ -55,6 +59,7 @@ export function run(argv: string[]): number {
     options: {
       inventory: { type: "string" },
       "claude-desktop": { type: "string" },
+      policy: { type: "string" },
       jurisdiction: { type: "string", default: "EU" },
       format: { type: "string", default: "md" },
       help: { type: "boolean", short: "h", default: false },
@@ -64,6 +69,25 @@ export function run(argv: string[]): number {
 
   if (values.help) {
     process.stdout.write(HELP);
+    return 0;
+  }
+
+  if (values.policy !== undefined) {
+    let inventory: Inventory;
+    try {
+      inventory = loadInventoryFile(values.policy);
+    } catch (error) {
+      process.stderr.write(`failed to load inventory: ${formatLoadError(error)}\n`);
+      return 1;
+    }
+    const recommendations = recommendPolicies(inventory);
+    if (values.format === "json") {
+      process.stdout.write(
+        `${JSON.stringify({ deployment: inventory.deployment.name, recommendations }, null, 2)}\n`,
+      );
+    } else {
+      process.stdout.write(renderPolicyMarkdown(recommendations, inventory.deployment.name));
+    }
     return 0;
   }
 

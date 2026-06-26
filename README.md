@@ -105,6 +105,16 @@ The zod schemas in `src/schemas/` are the source of truth for the full shape.
 
 The engine is code; the legal content is data. Every reference lives in `src/rules/data/` with its provenance and a `validated` flag, and no reference is invented by a model: AI Act articles are taken from the official text of Regulation (EU) 2024/1689, and NIS2 national articles from a maintained transposition data set, then checked before they ship.
 
+## Gateway policy recommendations
+
+A gap report tells you which obligations you are missing. `--policy <inventory.json>` goes one step further: for each high-risk tool (admin scope, credentials, write access, or the ability to shut things down), it recommends a gateway policy that restricts it, ranked by blast radius. Each recommendation is portable, plus a webMethods API Gateway artifact: a condition that matches the tool by inspecting the `tools/call` body (`params.name`), and the action that denies it, holds it for human approval, or restricts the callers.
+
+This is buildable, not a native feature. No MCP gateway today, IBM's included, gates on `params.name` out of the box, so the output is honest about what you would build and points at the coarser native lever (restricting which tools surface by OAuth scope). Only the Streamable HTTP transport works, since each tool call must arrive as a discrete request the gateway can inspect.
+
+```
+node dist/cli.js --policy inventory.json
+```
+
 ## Not legal advice
 
 This report is informational. It is not legal advice. Whether a given obligation actually applies to you depends on facts the tool does not know, such as whether your system is in fact high-risk under the AI Act, or whether your entity is in scope under NIS2. Confirm your obligations with qualified counsel.
