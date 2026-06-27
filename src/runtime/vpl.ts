@@ -75,19 +75,19 @@ stream PrivilegeEscalation = McpToolCall as a
     -> McpToolCall where admin and agent == a.agent as b
     -> McpToolCall where admin and agent == a.agent as c
     .within(${escWindow})
-    .where(a.admin)
+    .where(a.admin == true)
     .emit(event_type: "mcp.privilege_escalation", agent: a.agent, t1: a.tool, t2: b.tool, t3: c.tool)
 
 # 4. Credential read then external send by the same agent within ${exfilWindow}.
 stream CredentialExfil = McpToolCall as a
     -> McpToolCall where external_access and agent == a.agent as b
     .within(${exfilWindow})
-    .where(a.credentials)
+    .where(a.credentials == true)
     .emit(event_type: "mcp.credential_exfil", agent: a.agent, cred_tool: a.tool, exfil_tool: b.tool)
 
 # 5. Destructive burst: ${burstCount} or more writing calls by one agent in ${burstWindow}.
 stream DestructiveBurst = McpToolCall
-    .where(writes)
+    .where(writes == true)
     .window(${burstWindow})
     .aggregate(agent: last(agent), n: count())
     .where(n >= ${burstCount})

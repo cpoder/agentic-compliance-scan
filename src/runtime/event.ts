@@ -7,6 +7,8 @@ import type { Inventory, ToolEffects } from "../schemas/inventory.js";
  * Field names are snake_case to match the generated VPL `event McpToolCall`.
  */
 export interface McpToolCallEvent {
+  /** Varpulis event-type discriminator, so `varpulis run` routes the line. */
+  type: "McpToolCall";
   ts: number;
   agent: string;
   server: string;
@@ -75,6 +77,7 @@ export function enrichEvent(raw: RawToolCall, inventory: Inventory): McpToolCall
   const effects = lookupEffects(inventory, raw.server, tool);
   const e = effects ?? NEUTRAL;
   return {
+    type: "McpToolCall",
     ts: raw.ts ?? Date.now(),
     agent: raw.agent ?? "unknown",
     server: raw.server ?? "",
