@@ -122,6 +122,29 @@ node dist/cli.js --policy inventory.json --gateway envoy
 
 This is buildable, not a native feature. No MCP gateway today gates on `params.name` out of the box, so the output is honest about what you would build and points at the coarser native lever (restricting which tools surface by OAuth scope). Only the Streamable HTTP transport works, since each tool call must arrive as a discrete request the gateway can inspect.
 
+## Runtime governance with Varpulis
+
+The scan and the policies are static — a point in time. `--runtime` and `--bridge` add the runtime half: the risky tool-call patterns the static analysis predicts are detected live, on the real MCP traffic, by [Varpulis](https://varpulis-cep.com) (a CEP engine).
+
+`--runtime <inventory.json>` generates a Varpulis VPL ruleset, parameterised from the inventory — a high-blast tool firing, an admin tool called from outside its allowed OAuth scopes, a three-call privilege-escalation sequence, a credential-read-then-exfiltrate sequence, and a destructive burst. The allowed scopes and thresholds come from the same risk model as `--policy`.
+
+```
+node dist/cli.js --runtime inventory.json > mcp-governance.vpl
+```
+
+`--bridge` is the event side: it reads gateway-captured `tools/call` records as NDJSON on stdin, enriches each with the risk profile the static scan already computed for that tool (admin, credentials, blast radius), and emits Varpulis `McpToolCall` events to a sink. That enrichment is the point — Varpulis does not see raw calls, it sees calls already qualified by the scan, so its rules stay small.
+
+```
+# screencast / local varpulis run
+node dist/cli.js --bridge inventory.json --sink console < calls.ndjson
+# a running deployment: POST to Varpulis's HTTP connector
+node dist/cli.js --bridge inventory.json --sink http --target http://localhost:8080/ingest < calls.ndjson
+```
+
+Two sinks ship (`console`, `http`); adding Kafka or NATS is one file. The generated VPL is grounded in the verified `varpulis/varpulis` example rules; run it through the `varpulis` CLI against your deployment before relying on it.
+
+This completes the arc: **detect** (scan) → **contain** (gateway policy) → **monitor** (Varpulis runtime).
+
 ## Not legal advice
 
 This report is informational. It is not legal advice. Whether a given obligation actually applies to you depends on facts the tool does not know, such as whether your system is in fact high-risk under the AI Act, or whether your entity is in scope under NIS2. Confirm your obligations with qualified counsel.

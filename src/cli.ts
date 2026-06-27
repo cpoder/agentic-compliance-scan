@@ -12,6 +12,9 @@ import { recommendPolicies } from "./policy/recommend.js";
 import { renderPolicyMarkdown } from "./policy/render.js";
 import { renderReport } from "./report/index.js";
 import { loadAllRules } from "./rules/index.js";
+import { runBridge } from "./runtime/bridge.js";
+import { SINK_NAMES, SINKS, type Sink } from "./runtime/sinks/index.js";
+import { generateVpl } from "./runtime/vpl.js";
 import type { Finding } from "./schemas/findings.js";
 import type { Inventory } from "./schemas/inventory.js";
 import { JurisdictionSchema } from "./schemas/rules.js";
@@ -25,12 +28,18 @@ Usage:
   agentic-compliance-scan --inventory <file.json> --jurisdiction <EU|FR|IT|PT|BE|DE|AT> [--format md|json]
   agentic-compliance-scan --discover <mcp-config.json> [--name <deployment>] > inventory.json
   agentic-compliance-scan --policy <inventory.json> [--gateway webmethods|envoy] [--format md|json]
+  agentic-compliance-scan --runtime <inventory.json> > mcp-governance.vpl
+  agentic-compliance-scan --bridge <inventory.json> --sink <console|http> [--target <url>] < calls.ndjson
 
 Options:
   --inventory <file>       Path to a static inventory JSON file.
   --discover <file>        Connect to the MCP servers in a config (claude_desktop_config.json or .mcp.json), list their tools, classify the effects, and write a draft inventory to stdout for review.
   --policy <file>          Recommend gateway-agnostic policies to restrict the inventory's high-risk tools, ranked by blast radius (buildable, not a native gateway feature).
   --gateway <name>         With --policy, also render a product-specific snippet. One of: webmethods, envoy.
+  --runtime <file>         Generate a Varpulis (VPL) runtime-governance ruleset from the inventory, so risky tool-call patterns are detected live, not just scanned statically.
+  --bridge <file>          Read gateway-captured tool calls (NDJSON on stdin), enrich each with the static risk profile, and emit Varpulis McpToolCall events to --sink.
+  --sink <name>            With --bridge, the event sink: console (NDJSON to stdout) or http (POST to --target). Defaults to console.
+  --target <url>           With --sink http, the Varpulis HTTP connector endpoint.
   --name <deployment>      Deployment name for a discovered inventory. Defaults to discovered-deployment.
   --claude-desktop <file>  Path to a claude_desktop_config.json to import as a skeleton inventory.
   --jurisdiction <code>    Jurisdiction to report against. Defaults to EU.
@@ -63,6 +72,7 @@ export function run(argv: string[]): number {
       "claude-desktop": { type: "string" },
       policy: { type: "string" },
       gateway: { type: "string" },
+      runtime: { type: "string" },
       jurisdiction: { type: "string", default: "EU" },
       format: { type: "string", default: "md" },
       help: { type: "boolean", short: "h", default: false },
@@ -103,6 +113,18 @@ export function run(argv: string[]): number {
         renderPolicyMarkdown(recommendations, inventory.deployment.name, adapter),
       );
     }
+    return 0;
+  }
+
+  if (values.runtime !== undefined) {
+    let inventory: Inventory;
+    try {
+      inventory = loadInventoryFile(values.runtime);
+    } catch (error) {
+      process.stderr.write(`failed to load inventory: ${formatLoadError(error)}\n`);
+      return 1;
+    }
+    process.stdout.write(generateVpl(inventory));
     return 0;
   }
 
@@ -202,17 +224,67 @@ export async function runDiscover(argv: string[]): Promise<number> {
   return 0;
 }
 
+/**
+ * Bridge mode: read gateway-captured tool calls (NDJSON on stdin), enrich each
+ * with the static risk profile, and emit Varpulis McpToolCall events to the
+ * chosen sink (console for a screencast, http for a real Varpulis deployment).
+ */
+export async function runBridgeCli(argv: string[]): Promise<number> {
+  const { values } = parseArgs({
+    args: argv,
+    options: {
+      bridge: { type: "string" },
+      sink: { type: "string", default: "console" },
+      target: { type: "string" },
+      help: { type: "boolean", short: "h", default: false },
+    },
+    allowPositionals: false,
+  });
+
+  if (values.help || values.bridge === undefined) {
+    process.stdout.write(HELP);
+    return values.help ? 0 : 1;
+  }
+
+  let inventory: Inventory;
+  try {
+    inventory = loadInventoryFile(values.bridge);
+  } catch (error) {
+    process.stderr.write(`failed to load inventory: ${formatLoadError(error)}\n`);
+    return 1;
+  }
+
+  const sinkName = values.sink ?? "console";
+  const factory = SINKS[sinkName];
+  if (factory === undefined) {
+    process.stderr.write(`unknown sink: ${sinkName}. Available: ${SINK_NAMES.join(", ")}\n`);
+    return 1;
+  }
+  let sink: Sink;
+  try {
+    sink = factory({ target: values.target });
+  } catch (error) {
+    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
+    return 1;
+  }
+
+  const { emitted, skipped } = await runBridge(inventory, sink);
+  process.stderr.write(`# bridge: ${emitted} event(s) emitted, ${skipped} skipped\n`);
+  return 0;
+}
+
 const isMain = process.argv[1] === fileURLToPath(import.meta.url);
 if (isMain) {
   const argv = process.argv.slice(2);
-  if (argv.includes("--discover")) {
-    runDiscover(argv).then(
-      (code) => process.exit(code),
-      (error) => {
-        process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
-        process.exit(1);
-      },
-    );
+  const onResult = (code: number) => process.exit(code);
+  const onError = (error: unknown) => {
+    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
+    process.exit(1);
+  };
+  if (argv.includes("--bridge")) {
+    runBridgeCli(argv).then(onResult, onError);
+  } else if (argv.includes("--discover")) {
+    runDiscover(argv).then(onResult, onError);
   } else {
     process.exit(run(argv));
   }

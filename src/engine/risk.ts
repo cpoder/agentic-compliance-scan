@@ -6,7 +6,7 @@ const RANK_TO_SEVERITY: Severity[] = ["info", "low", "medium", "high"];
 
 // An admin/root-like permission scope, matched as a whole token (so "wm:admin"
 // and "db-admin" hit, but "administer_self" does not over-trigger).
-const ADMIN_SCOPE = /(^|[:_-])(admin|administrator|root|superuser)([:_-]|$)/i;
+export const ADMIN_SCOPE = /(^|[:_-])(admin|administrator|root|superuser)([:_-]|$)/i;
 
 /**
  * A rough blast-radius score for a single tool: how much damage it could do if
