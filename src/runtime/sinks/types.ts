@@ -7,8 +7,10 @@ export interface Sink {
 }
 
 export interface SinkOptions {
-  /** Connector target, e.g. the Varpulis HTTP endpoint for the `http` sink. */
+  /** Connector target: the Varpulis HTTP endpoint (`http`) or NATS server URL (`nats`). */
   target?: string;
+  /** NATS subject to publish to (`nats` sink). */
+  subject?: string;
 }
 
 export type SinkFactory = (opts: SinkOptions) => Sink;

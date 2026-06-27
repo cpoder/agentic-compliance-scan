@@ -28,8 +28,8 @@ Usage:
   agentic-compliance-scan --inventory <file.json> --jurisdiction <EU|FR|IT|PT|BE|DE|AT> [--format md|json]
   agentic-compliance-scan --discover <mcp-config.json> [--name <deployment>] > inventory.json
   agentic-compliance-scan --policy <inventory.json> [--gateway webmethods|envoy] [--format md|json]
-  agentic-compliance-scan --runtime <inventory.json> > mcp-governance.vpl
-  agentic-compliance-scan --bridge <inventory.json> --sink <console|http> [--target <url>] < calls.ndjson
+  agentic-compliance-scan --runtime <inventory.json> [--source nats --subject <s>] > mcp-governance.vpl
+  agentic-compliance-scan --bridge <inventory.json> --sink <console|http|nats> [--target <url>] [--subject <s>] < calls.ndjson
 
 Options:
   --inventory <file>       Path to a static inventory JSON file.
@@ -37,9 +37,11 @@ Options:
   --policy <file>          Recommend gateway-agnostic policies to restrict the inventory's high-risk tools, ranked by blast radius (buildable, not a native gateway feature).
   --gateway <name>         With --policy, also render a product-specific snippet. One of: webmethods, envoy.
   --runtime <file>         Generate a Varpulis (VPL) runtime-governance ruleset from the inventory, so risky tool-call patterns are detected live, not just scanned statically.
+  --source <name>          With --runtime, emit a source connector: nats (a NATS connector + ingest stream). Default: none.
   --bridge <file>          Read gateway-captured tool calls (NDJSON on stdin), enrich each with the static risk profile, and emit Varpulis McpToolCall events to --sink.
-  --sink <name>            With --bridge, the event sink: console (NDJSON to stdout) or http (POST to --target). Defaults to console.
-  --target <url>           With --sink http, the Varpulis HTTP connector endpoint.
+  --sink <name>            With --bridge, the event sink: console (NDJSON to stdout), nats (publish to --subject), or http (POST to --target). Defaults to console.
+  --target <url>           Transport URL: the Varpulis HTTP endpoint (--sink http) or the NATS server (--sink nats / --source nats). Defaults to nats://localhost:4222 for NATS.
+  --subject <subject>      NATS subject for --sink nats / --source nats. Defaults to mcp.toolcalls.
   --name <deployment>      Deployment name for a discovered inventory. Defaults to discovered-deployment.
   --claude-desktop <file>  Path to a claude_desktop_config.json to import as a skeleton inventory.
   --jurisdiction <code>    Jurisdiction to report against. Defaults to EU.
@@ -73,6 +75,9 @@ export function run(argv: string[]): number {
       policy: { type: "string" },
       gateway: { type: "string" },
       runtime: { type: "string" },
+      source: { type: "string" },
+      subject: { type: "string" },
+      target: { type: "string" },
       jurisdiction: { type: "string", default: "EU" },
       format: { type: "string", default: "md" },
       help: { type: "boolean", short: "h", default: false },
@@ -124,7 +129,13 @@ export function run(argv: string[]): number {
       process.stderr.write(`failed to load inventory: ${formatLoadError(error)}\n`);
       return 1;
     }
-    process.stdout.write(generateVpl(inventory));
+    process.stdout.write(
+      generateVpl(inventory, {
+        source: values.source === "nats" ? "nats" : "none",
+        natsUrl: values.target,
+        subject: values.subject,
+      }),
+    );
     return 0;
   }
 
@@ -236,6 +247,7 @@ export async function runBridgeCli(argv: string[]): Promise<number> {
       bridge: { type: "string" },
       sink: { type: "string", default: "console" },
       target: { type: "string" },
+      subject: { type: "string" },
       help: { type: "boolean", short: "h", default: false },
     },
     allowPositionals: false,
@@ -262,7 +274,7 @@ export async function runBridgeCli(argv: string[]): Promise<number> {
   }
   let sink: Sink;
   try {
-    sink = factory({ target: values.target });
+    sink = factory({ target: values.target, subject: values.subject });
   } catch (error) {
     process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
     return 1;
